@@ -1,0 +1,53 @@
+---
+description: 프로젝트 아키텍처, 폴더 구조, 레이어 규칙 (무신사 스타일 이커머스)
+alwaysApply: true
+---
+
+# 아키텍처 규칙
+
+## 폴더 구조 (Next.js App Router 기준)
+
+```
+src/
+  app/                    # 라우트·레이아웃·페이지 (thin, 데이터 바인딩 위주)
+    (auth)/               # 로그인·회원가입 등
+    (main)/               # 메인·상품·장바구니·마이페이지
+    layout.tsx
+  components/             # 공통 UI
+    ui/                   # 기본 컴포넌트 (Button, Input, Modal…)
+    domain/               # 도메인별 컴포넌트 (ProductCard, CartItem…)
+    layout/               # Header, Footer, Nav
+  features/               # 기능 단위 모듈 (훅·유틸·타입 포함)
+    auth/
+    product/
+    cart/
+    order/
+  hooks/                  # 도메인 무관 공통 훅
+  lib/                    # API 클라이언트, 유틸, 상수
+  types/                  # 전역 타입·인터페이스
+  styles/                 # 글로벌 스타일
+```
+
+## 레이어 규칙
+
+- **app/**  
+  - 페이지·레이아웃만. 비즈니스 로직·상태는 `features/` 또는 `hooks/`로 위임.
+- **components/**  
+  - props 기반 presentational. API 호출·전역 상태 직접 사용 지양.
+- **features/**  
+  - 도메인별: `api.ts`, `hooks.ts`, `types.ts`, 필요 시 `utils.ts`. 페이지/컴포넌트에서 여기만 참조.
+- **lib/**  
+  - fetch 래퍼, 인증 헤더, 공통 유틸. 도메인에 무관한 코드만.
+
+## 네이밍
+
+- **파일**: 컴포넌트는 `PascalCase.tsx`, 훅은 `use*.ts`, 유틸/타입은 `camelCase.ts`.
+- **디렉터리**: 소문자·kebab 또는 단일 단어 (`product`, `cart`, `order`).
+- **라우트 세그먼트**: 소문자, 필요 시 kebab (`/product-detail`, `/my-page`).
+
+## 의존성 방향
+
+- `app` → `features`, `components`, `hooks`, `lib`
+- `features` → `lib`, `types`, `components/ui`
+- `components/domain` → `components/ui`, `lib`, `types`
+- `lib`, `types` → 외부 패키지만; 프로젝트 내부 다른 레이어 참조 금지.

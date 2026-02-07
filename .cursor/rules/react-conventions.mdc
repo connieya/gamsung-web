@@ -1,0 +1,43 @@
+---
+description: React 컴포넌트·훅·상태 패턴 (무신사 이커머스)
+globs: "**/*.tsx"
+alwaysApply: false
+---
+
+# React 컨벤션
+
+## 컴포넌트
+
+- **함수형 컴포넌트**만 사용. `function ComponentName()` 또는 화살표 함수 일관 적용.
+- **한 파일 한 컴포넌트**. 단, 작은 sub 컴포넌트는 같은 파일 하단에.
+- **props 타입**: `interface Props` 또는 `interface ComponentNameProps`로 명시. `children` 필요 시 포함.
+
+```typescript
+// ✅ GOOD
+interface ProductCardProps {
+  product: Product;
+  onWish?: (id: string) => void;
+}
+
+export function ProductCard({ product, onWish }: ProductCardProps) {
+  return (/* ... */);
+}
+```
+
+## 훅·상태
+
+- **재사용 로직**: custom hook으로 분리 (`features/*/hooks.ts` 또는 `hooks/`).
+- **서버 데이터**: TanStack Query (useQuery, useMutation). 캐시 키는 feature 단위로 통일.
+- **UI·폼 상태**: useState. 전역 필요 시 Zustand 등 한 가지 방식으로 통일.
+- **useEffect**: 데이터 fetch는 Query에 위임. 구독·DOM 부수효과만 useEffect 사용.
+
+## 렌더링
+
+- **조건부 렌더링**: early return으로 가독성 유지. 중첩 삼항 연산자 지양.
+- **리스트**: key는 고유 ID. index는 정렬 변경 가능 시 사용 금지.
+- **접근성**: 버튼/링크에 의미 있는 텍스트 또는 aria-label. 이미지에 alt.
+
+## 스타일
+
+- **Tailwind** 사용 시 유틸 클래스만. 복잡한 조합은 `cn()` 또는 공통 클래스로 묶기.
+- **컴포넌트 스타일**: 같은 파일 또는 `*.module.css` colocate. 전역은 `styles/`에만.

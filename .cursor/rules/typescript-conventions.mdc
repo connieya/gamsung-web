@@ -1,0 +1,58 @@
+---
+description: TypeScript·코드 컨벤션 (타입, 네이밍, 에러 핸들링)
+globs: "**/*.ts,**/*.tsx"
+alwaysApply: false
+---
+
+# TypeScript·코드 컨벤션
+
+## 타입
+
+- **인터페이스**: 도메인 엔티티·API 스키마는 `interface` 사용. `type`은 유니온·유틸리티용.
+- **export**: 타입은 `types/` 또는 해당 feature의 `types.ts`에 정의 후 재사용. 인라인 객체 타입 지양.
+- **any 금지**: 불가피할 때만 `unknown` 후 type guard. `@ts-ignore`는 사유 주석 필수.
+
+```typescript
+// ✅ GOOD
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  brand: Brand;
+}
+
+// ❌ BAD
+const data: any = await fetchProduct();
+```
+
+## 네이밍
+
+- **변수·함수**: camelCase.
+- **상수**: UPPER_SNAKE (환경/설정), 또는 camelCase (일반 상수).
+- **boolean**: is/has/can 접두사 (예: `isLoading`, `hasNext`).
+- **이벤트 핸들러**: handle 접두사 (예: `handleSubmit`, `handleAddToCart`).
+
+## 에러·비동기
+
+- **async/await** 사용. `.then()` 체인은 복잡한 경우만.
+- **try/catch**: catch 시 로깅 후 재throw 또는 사용자 메시지 반환. 빈 catch 금지.
+- **API 에러**: 공통 에러 타입 정의 후 `lib/`에서 처리. 컴포넌트는 "실패 시 UI"만 담당.
+
+```typescript
+// ✅ GOOD
+try {
+  const data = await fetchProduct(id);
+  return data;
+} catch (e) {
+  logger.error('fetchProduct failed', { id, error: e });
+  throw new DataFetchError('상품을 불러올 수 없습니다', { cause: e });
+}
+```
+
+## import 순서
+
+1. React/Next
+2. 외부 라이브러리 (알파벳)
+3. 내부 절대 경로 (`@/components`, `@/features`…)
+4. 상대 경로
+5. 타입만 쓰는 경우 `import type`

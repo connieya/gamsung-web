@@ -1,0 +1,32 @@
+---
+description: API 호출·데이터 레이어 규칙 (features, lib)
+globs: "**/features/**/*.ts,**/lib/**/*.ts"
+alwaysApply: false
+---
+
+# API·데이터 컨벤션
+
+## API 클라이언트
+
+- **base URL·헤더**: `lib/api/client.ts` 등 한 곳에서 설정. 인증 토큰은 여기서만 주입.
+- **엔드포인트**: `features/*/api.ts`에 함수로 정의. URL·메서드·요청/응답 타입 명시.
+
+```typescript
+// ✅ GOOD (features/product/api.ts)
+import { client } from '@/lib/api/client';
+import type { Product, ProductListParams } from '../types';
+
+export async function getProductList(params: ProductListParams): Promise<Product[]> {
+  const { data } = await client.get<Product[]>('/products', { params });
+  return data;
+}
+```
+
+## 데이터 페칭
+
+- **React Query**: `useQuery`/`useMutation`은 feature의 custom hook에서만 사용. queryKey는 `['feature', ...params]` 형태로 통일.
+- **에러**: API 레이어에서 공통 에러 타입으로 변환. 컴포넌트는 `isError`, `error.message`만 사용.
+
+## 타입
+
+- **요청/응답**: API 스키마와 동일한 interface 정의. 옵션 필드는 `?`. 리스트는 `T[]` 또는 `PaginatedResponse<T>`.
