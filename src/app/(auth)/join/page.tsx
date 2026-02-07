@@ -30,9 +30,9 @@ export default function JoinPage() {
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      <h1 className="text-xl font-bold text-gray-900">회원가입</h1>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+    <div className="w-full rounded-2xl border border-brand-border bg-brand-white p-8 shadow-card sm:p-10">
+      <h1 className="text-display font-bold text-brand-black">회원가입</h1>
+      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <Input
           label="사용자 ID"
           placeholder="예: user1"
@@ -56,13 +56,13 @@ export default function JoinPage() {
           required
         />
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label className="mb-1.5 block text-body font-medium text-brand-black">
             성별
           </label>
           <select
             value={gender}
             onChange={(e) => setGender(e.target.value)}
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="w-full rounded-lg border border-brand-border bg-brand-white px-4 py-3 text-body text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-black"
           >
             <option value="MALE">남성</option>
             <option value="FEMALE">여성</option>
@@ -83,11 +83,13 @@ export default function JoinPage() {
         </Button>
       </form>
       {register.isError && (
-        <p className="mt-2 text-sm text-red-600">{register.error?.message}</p>
+        <p className="mt-2 text-caption text-red-600">
+          {register.error?.message}
+        </p>
       )}
       <Link
         href="/login"
-        className="mt-4 block text-center text-sm text-gray-600 hover:underline"
+        className="mt-6 block text-center text-body text-brand-gray hover:text-brand-black"
       >
         로그인
       </Link>

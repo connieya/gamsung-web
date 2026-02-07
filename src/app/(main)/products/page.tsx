@@ -36,7 +36,7 @@ export default function ProductListPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -44,8 +44,10 @@ export default function ProductListPage() {
 
   if (isError) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-12 text-center">
-        <p className="text-red-600">{error?.message ?? "목록을 불러올 수 없습니다."}</p>
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6">
+        <p className="text-body text-red-600">
+          {error?.message ?? "목록을 불러올 수 없습니다."}
+        </p>
       </div>
     );
   }
@@ -53,42 +55,54 @@ export default function ProductListPage() {
   const isEmpty = !data?.items?.length;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900">상품 목록</h1>
-      <div className="mt-4 flex flex-wrap items-center gap-4">
-        <span className="text-sm text-gray-600">정렬</span>
-        <select
-          value={sort}
-          onChange={(e) => {
-            setSort(e.target.value as ProductSort);
-            setPage(0);
-          }}
-          className="rounded-md border border-gray-300 px-3 py-2 text-sm"
-        >
-          {SORT_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-display font-bold text-brand-black">스타일</h1>
+        <div className="flex items-center gap-3">
+          <span className="text-body text-brand-gray">정렬</span>
+          <select
+            value={sort}
+            onChange={(e) => {
+              setSort(e.target.value as ProductSort);
+              setPage(0);
+            }}
+            className="rounded-lg border border-brand-border bg-brand-white px-4 py-2.5 text-body text-brand-black focus:outline-none focus:ring-2 focus:ring-brand-black"
+          >
+            {SORT_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {isEmpty ? (
-        <p className="mt-12 text-center text-gray-500">표시할 상품이 없습니다.</p>
+        <div className="mt-20 py-16 text-center">
+          <p className="text-body text-brand-gray">
+            표시할 상품이 없습니다.
+          </p>
+        </div>
       ) : (
         <>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:gap-6">
             {data.items.map((product) => (
               <ProductCard
                 key={product.productId}
                 product={product}
                 liked={likedIds.has(product.productId)}
-                onLike={userId ? () => addLike.mutate(product.productId) : undefined}
-                onUnlike={userId ? () => removeLike.mutate(product.productId) : undefined}
+                onLike={
+                  userId ? () => addLike.mutate(product.productId) : undefined
+                }
+                onUnlike={
+                  userId
+                    ? () => removeLike.mutate(product.productId)
+                    : undefined
+                }
               />
             ))}
           </div>
-          <div className="mt-8 flex justify-center gap-2">
+          <div className="mt-12 flex items-center justify-center gap-4">
             <Button
               variant="secondary"
               disabled={page === 0}
@@ -96,7 +110,7 @@ export default function ProductListPage() {
             >
               이전
             </Button>
-            <span className="flex items-center px-4 text-sm text-gray-600">
+            <span className="text-body text-brand-gray">
               {page + 1} / {data.totalPage || 1}
             </span>
             <Button

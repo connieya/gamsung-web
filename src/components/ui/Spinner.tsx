@@ -6,13 +6,13 @@ interface SpinnerProps {
 const sizeClass = {
   sm: "h-4 w-4 border-2",
   md: "h-8 w-8 border-2",
-  lg: "h-12 w-12 border-3",
+  lg: "h-10 w-10 border-[3px]",
 };
 
 export function Spinner({ size = "md", className = "" }: SpinnerProps) {
   return (
     <span
-      className={`inline-block animate-spin rounded-full border-gray-300 border-t-gray-900 ${sizeClass[size]} ${className}`}
+      className={`inline-block animate-spin rounded-full border-brand-border border-t-brand-black ${sizeClass[size]} ${className}`}
       role="status"
       aria-label="로딩 중"
     />

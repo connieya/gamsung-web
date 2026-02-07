@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+  body {
+    @apply bg-brand-bg text-brand-black antialiased;
+  }
+  ::selection {
+    @apply bg-brand-black/10;
+  }
+}
+
+@layer components {
+  .link-nav {
+    @apply text-body text-brand-gray transition-colors hover:text-brand-black;
+  }
+  .btn-primary {
+    @apply rounded-full bg-brand-black px-6 py-3 text-body font-medium text-white transition-colors hover:bg-black disabled:opacity-50;
+  }
+  .btn-outline {
+    @apply rounded-full border border-brand-border bg-white px-6 py-3 text-body font-medium text-brand-black transition-colors hover:border-brand-black hover:bg-brand-bg;
+  }
+}
+
+/* Font: layout.tsx에서 next/font로 Pretendard 로드 */

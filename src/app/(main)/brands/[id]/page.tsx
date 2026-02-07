@@ -31,9 +31,12 @@ export default function BrandPage() {
 
   if (brandId == null || brandError) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-12 text-center">
-        <p className="text-red-600">해당 브랜드를 찾을 수 없습니다.</p>
-        <Link href="/products" className="mt-4 inline-block text-gray-600 underline">
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6">
+        <p className="text-body text-red-600">해당 브랜드를 찾을 수 없습니다.</p>
+        <Link
+          href="/products"
+          className="mt-4 inline-block text-body text-brand-gray underline hover:text-brand-black"
+        >
           상품 목록으로
         </Link>
       </div>
@@ -42,7 +45,7 @@ export default function BrandPage() {
 
   if (brandLoading || !brand) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -52,27 +55,35 @@ export default function BrandPage() {
   const isLoadingProducts = productLoading;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900">{brand.name}</h1>
-      {brand.description && (
-        <p className="mt-2 text-gray-600">{brand.description}</p>
-      )}
-      <h2 className="mt-8 text-lg font-semibold text-gray-900">상품 목록</h2>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <div className="rounded-2xl border border-brand-border bg-brand-white p-8">
+        <h1 className="text-display font-bold text-brand-black">{brand.name}</h1>
+        {brand.description && (
+          <p className="mt-3 text-body text-brand-gray">{brand.description}</p>
+        )}
+      </div>
+      <h2 className="mt-10 text-title font-semibold text-brand-black">
+        상품 목록
+      </h2>
       {isLoadingProducts ? (
-        <div className="flex justify-center py-12">
+        <div className="flex justify-center py-16">
           <Spinner size="lg" />
         </div>
       ) : products.length === 0 ? (
-        <p className="mt-4 text-gray-500">표시할 상품이 없습니다.</p>
+        <p className="mt-6 text-body text-brand-gray">표시할 상품이 없습니다.</p>
       ) : (
-        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:gap-6">
           {products.map((product) => (
             <ProductCard
               key={product.productId}
               product={product}
               liked={likedIds.has(product.productId)}
-              onLike={userId ? () => addLike.mutate(product.productId) : undefined}
-              onUnlike={userId ? () => removeLike.mutate(product.productId) : undefined}
+              onLike={
+                userId ? () => addLike.mutate(product.productId) : undefined
+              }
+              onUnlike={
+                userId ? () => removeLike.mutate(product.productId) : undefined
+              }
             />
           ))}
         </div>

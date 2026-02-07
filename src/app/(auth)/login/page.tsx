@@ -22,12 +22,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      <h1 className="text-xl font-bold text-gray-900">로그인</h1>
-      <p className="mt-1 text-sm text-gray-500">
+    <div className="w-full rounded-2xl border border-brand-border bg-brand-white p-8 shadow-card sm:p-10">
+      <h1 className="text-display font-bold text-brand-black">로그인</h1>
+      <p className="mt-2 text-body text-brand-gray">
         데모: 사용자 ID를 입력하면 로그인됩니다. (X-USER-ID)
       </p>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <Input
           label="사용자 ID"
           placeholder="예: user1"
@@ -41,7 +41,7 @@ export default function LoginPage() {
       </form>
       <Link
         href="/join"
-        className="mt-4 block text-center text-sm text-gray-600 hover:underline"
+        className="mt-6 block text-center text-body text-brand-gray hover:text-brand-black"
       >
         회원가입
       </Link>

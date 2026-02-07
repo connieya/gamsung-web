@@ -28,11 +28,14 @@ export default function ProductDetailPage() {
 
   if (productId == null || isError) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-12 text-center">
-        <p className="text-red-600">
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6">
+        <p className="text-body text-red-600">
           {error?.message ?? "해당 상품을 찾을 수 없습니다."}
         </p>
-        <Link href="/products" className="mt-4 inline-block text-gray-600 underline">
+        <Link
+          href="/products"
+          className="mt-4 inline-block text-body text-brand-gray underline hover:text-brand-black"
+        >
           상품 목록으로
         </Link>
       </div>
@@ -41,7 +44,7 @@ export default function ProductDetailPage() {
 
   if (isLoading || !data) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center">
+      <div className="flex min-h-[50vh] items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
@@ -57,32 +60,32 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="grid gap-8 md:grid-cols-2">
-        <div className="aspect-square bg-gray-100" />
+    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+      <div className="grid gap-10 md:grid-cols-2 lg:gap-16">
+        <div className="aspect-square overflow-hidden rounded-xl bg-[#f0f0f0]" />
         <div>
-          <p className="text-sm text-gray-500">{data.brandName}</p>
-          <h1 className="mt-1 text-2xl font-bold text-gray-900">
+          <p className="text-caption text-brand-gray">{data.brandName}</p>
+          <h1 className="mt-2 text-display font-bold text-brand-black">
             {data.productName}
           </h1>
-          <p className="mt-2 text-xl font-semibold text-gray-900">
+          <p className="mt-4 text-title font-semibold text-brand-black">
             {formatPrice(data.price)}
           </p>
-          <div className="mt-4 flex items-center gap-2">
-            <span className="text-sm text-gray-500">♥ {data.likeCount}</span>
-            {data.rank != null && (
-              <span className="text-sm text-gray-500">랭크 #{data.rank}</span>
-            )}
+          <div className="mt-4 flex items-center gap-4 text-body text-brand-gray">
+            <span>♥ {data.likeCount}</span>
+            {data.rank != null && <span>랭크 #{data.rank}</span>}
           </div>
-          <div className="mt-6 flex gap-3">
-            <button
-              type="button"
+          <div className="mt-8 flex gap-3">
+            <Button
+              variant={liked ? "secondary" : "primary"}
               onClick={handleLike}
-              className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
               aria-label={liked ? "좋아요 취소" : "좋아요"}
             >
               {liked ? "♥ 좋아요 취소" : "♡ 좋아요"}
-            </button>
+            </Button>
+            <Link href="/products">
+              <Button variant="secondary">목록으로</Button>
+            </Link>
           </div>
         </div>
       </div>

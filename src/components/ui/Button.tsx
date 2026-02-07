@@ -9,16 +9,20 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClass = {
-  primary: "bg-black text-white hover:bg-gray-800 disabled:bg-gray-400",
-  secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 disabled:bg-gray-200",
-  ghost: "bg-transparent text-gray-700 hover:bg-gray-100",
-  danger: "bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300",
+  primary:
+    "bg-brand-black text-white hover:bg-black disabled:bg-brand-gray disabled:text-brand-white",
+  secondary:
+    "border border-brand-border bg-brand-white text-brand-black hover:border-brand-black hover:bg-brand-bg disabled:opacity-50",
+  ghost:
+    "bg-transparent text-brand-black hover:bg-brand-bg disabled:opacity-50",
+  danger:
+    "bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300",
 };
 
 const sizeClass = {
-  sm: "px-3 py-1.5 text-sm",
-  md: "px-4 py-2 text-sm",
-  lg: "px-6 py-3 text-base",
+  sm: "px-3 py-1.5 text-caption",
+  md: "px-5 py-2.5 text-body",
+  lg: "px-6 py-3 text-title",
 };
 
 export function Button({
@@ -34,7 +38,7 @@ export function Button({
     <button
       type="button"
       disabled={disabled ?? isLoading}
-      className={`inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 ${variantClass[variant]} ${sizeClass[size]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-brand-black focus:ring-offset-2 ${variantClass[variant]} ${sizeClass[size]} ${className}`}
       {...props}
     >
       {isLoading ? (

@@ -30,35 +30,37 @@ export function ProductCard({
   return (
     <Link
       href={`/products/${product.productId}`}
-      className="group block overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-md"
+      className="group block overflow-hidden rounded-none bg-brand-white transition-[box-shadow] hover:shadow-card-hover"
     >
-      <div className="aspect-square bg-gray-100" />
-      <div className="p-3">
-        <p className="text-xs text-gray-500">{product.brandName}</p>
-        <h3 className="mt-0.5 font-medium text-gray-900 line-clamp-2 group-hover:underline">
+      <div className="relative aspect-[3/4] overflow-hidden bg-[#f0f0f0]">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+        {(onLike || onUnlike) && (
+          <button
+            type="button"
+            onClick={handleLikeClick}
+            className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-lg shadow-card transition-transform hover:scale-110"
+            aria-label={liked ? "좋아요 취소" : "좋아요"}
+          >
+            <span
+              className={liked ? "text-red-500" : "text-brand-gray"}
+            >
+              {liked ? "♥" : "♡"}
+            </span>
+          </button>
+        )}
+      </div>
+      <div className="p-3 sm:p-4">
+        <p className="text-caption text-brand-gray">{product.brandName}</p>
+        <h3 className="mt-1 line-clamp-2 text-body font-medium text-brand-black group-hover:underline">
           {product.productName}
         </h3>
-        <div className="mt-2 flex items-center justify-between">
-          <span className="font-semibold text-gray-900">
+        <div className="mt-2 flex items-baseline justify-between gap-2">
+          <span className="text-title font-semibold text-brand-black">
             {formatPrice(product.price)}
           </span>
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-gray-500">
-              ♥ {product.likeCount}
-            </span>
-            {(onLike || onUnlike) && (
-              <button
-                type="button"
-                onClick={handleLikeClick}
-                className="rounded p-1 hover:bg-gray-100"
-                aria-label={liked ? "좋아요 취소" : "좋아요"}
-              >
-                <span className={liked ? "text-red-500" : "text-gray-400"}>
-                  {liked ? "♥" : "♡"}
-                </span>
-              </button>
-            )}
-          </div>
+          <span className="text-caption text-brand-gray">
+            ♥ {product.likeCount}
+          </span>
         </div>
       </div>
     </Link>
