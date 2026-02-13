@@ -18,11 +18,14 @@ export default function ProductDetailPage() {
   const productId = params?.id ? Number(params.id) : null;
   const userId = useAuthStore((s) => s.userId);
   const { data, isLoading, isError, error } = useProductDetail(productId);
-  const { data: likesData } = useMyLikes();
+  const { data: likesData, isLoading: likesLoading } = useMyLikes();
   const likedIds = new Set(
-    likesData?.likedProducts?.map((p) => p.productId) ?? []
+    likesData?.likedProducts?.map((p) => Number(p.productId)) ?? []
   );
-  const liked = productId != null && likedIds.has(productId);
+  const liked =
+    productId != null &&
+    likedIds.has(productId);
+  const likesReady = !userId || !likesLoading;
   const addLike = useAddLike();
   const removeLike = useRemoveLike();
 
@@ -72,16 +75,23 @@ export default function ProductDetailPage() {
             {formatPrice(data.price)}
           </p>
           <div className="mt-4 flex items-center gap-4 text-body text-brand-gray">
-            <span>♥ {data.likeCount}</span>
+            <span>♥ {data.likeCount ?? 0}</span>
             {data.rank != null && <span>랭크 #{data.rank}</span>}
           </div>
           <div className="mt-8 flex gap-3">
             <Button
-              variant={liked ? "secondary" : "primary"}
+              variant={likesReady && liked ? "secondary" : "primary"}
               onClick={handleLike}
-              aria-label={liked ? "좋아요 취소" : "좋아요"}
+              disabled={userId != null && !likesReady}
+              aria-label={
+                !likesReady ? "확인 중" : liked ? "좋아요 취소" : "좋아요"
+              }
             >
-              {liked ? "♥ 좋아요 취소" : "♡ 좋아요"}
+              {!likesReady
+                ? "♡ 확인 중..."
+                : liked
+                  ? "♥ 좋아요 취소"
+                  : "♡ 좋아요"}
             </Button>
             <Link href="/products">
               <Button variant="secondary">목록으로</Button>

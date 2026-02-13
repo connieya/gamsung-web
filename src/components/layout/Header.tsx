@@ -2,10 +2,19 @@
 
 import Link from "next/link";
 import { useAuthStore } from "@/features/auth/store";
+import { useMe } from "@/features/auth/hooks";
+
+function displayName(email: string | undefined): string {
+  if (!email) return "";
+  const at = email.indexOf("@");
+  return at > 0 ? email.slice(0, at) : email;
+}
 
 export function Header() {
   const userId = useAuthStore((s) => s.userId);
   const logout = useAuthStore((s) => s.logout);
+  const { data: me } = useMe();
+  const userName = displayName(me?.email);
 
   return (
     <header className="sticky top-0 z-50 border-b border-brand-border bg-brand-white">
@@ -32,6 +41,11 @@ export function Header() {
           </Link>
           {userId ? (
             <>
+              {userName && (
+                <span className="text-caption font-medium text-brand-gray">
+                  {userName}님
+                </span>
+              )}
               <Link href="/my-page" className="link-nav font-medium">
                 마이
               </Link>
