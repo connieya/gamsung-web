@@ -96,7 +96,15 @@ export default function ProductDetailPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="grid gap-10 md:grid-cols-2 lg:gap-16">
-        <div className="aspect-square overflow-hidden rounded-xl bg-[#f0f0f0]" />
+        <div className="aspect-square overflow-hidden rounded-xl bg-[#f0f0f0]">
+          {data.imageUrl && (
+            <img
+              src={data.imageUrl}
+              alt={data.productName}
+              className="h-full w-full object-cover"
+            />
+          )}
+        </div>
         <div>
           <p className="text-caption text-brand-gray">{data.brandName}</p>
           <h1 className="mt-2 text-display font-bold text-brand-black">

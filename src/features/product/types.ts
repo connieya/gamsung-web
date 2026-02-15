@@ -13,6 +13,7 @@ export interface ProductSummaryItem {
   price: number;
   productName: string;
   brandName: string;
+  imageUrl: string | null;
   likeCount: number;
   releasedAt: string;
 }
@@ -30,6 +31,7 @@ export interface ProductDetailResponse {
   productName: string;
   price: number;
   brandName: string;
+  imageUrl: string | null;
   likeCount: number;
   rank: number | null;
 }

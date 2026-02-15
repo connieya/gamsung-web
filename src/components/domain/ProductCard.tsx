@@ -33,6 +33,14 @@ export function ProductCard({
       className="group block overflow-hidden rounded-none bg-brand-white transition-[box-shadow] hover:shadow-card-hover"
     >
       <div className="relative aspect-[3/4] overflow-hidden bg-[#f0f0f0]">
+        {product.imageUrl && (
+          <img
+            src={product.imageUrl}
+            alt={product.productName}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
         {(onLike || onUnlike) && (
           <button
