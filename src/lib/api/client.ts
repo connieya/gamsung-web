@@ -50,6 +50,16 @@ export const client = {
     return handleResponse<T>(res);
   },
 
+  async put<T>(path: string, body?: unknown, init?: RequestInit): Promise<T> {
+    const res = await fetch(buildUrl(path), {
+      ...init,
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...init?.headers },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return handleResponse<T>(res);
+  },
+
   async delete<T>(path: string, init?: RequestInit): Promise<T> {
     const res = await fetch(buildUrl(path), {
       ...init,

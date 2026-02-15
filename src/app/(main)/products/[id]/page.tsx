@@ -7,6 +7,8 @@ import { Spinner } from "@/components/ui/Spinner";
 import { useProductDetail } from "@/features/product/hooks";
 import { useAuthStore } from "@/features/auth/store";
 import { useAddLike, useRemoveLike, useMyLikes } from "@/features/likes/hooks";
+import { useAddToCart } from "@/features/cart/hooks";
+import { useCartStore } from "@/features/cart/store";
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat("ko-KR").format(price) + "원";
@@ -28,6 +30,8 @@ export default function ProductDetailPage() {
   const likesReady = !userId || !likesLoading;
   const addLike = useAddLike();
   const removeLike = useRemoveLike();
+  const addToCartMutation = useAddToCart();
+  const addToLocalCart = useCartStore((s) => s.addItem);
 
   if (productId == null || isError) {
     return (
@@ -62,6 +66,33 @@ export default function ProductDetailPage() {
     else addLike.mutate(productId);
   };
 
+  const handleAddToCart = () => {
+    if (!data) return;
+    
+    if (userId) {
+      addToCartMutation.mutate(
+        { productId, quantity: 1 },
+        {
+          onSuccess: () => {
+            if (confirm("장바구니에 담았습니다. 장바구니로 이동하시겠습니까?")) {
+              router.push("/cart");
+            }
+          },
+        }
+      );
+    } else {
+      addToLocalCart({
+        productId,
+        productName: data.productName,
+        price: data.price,
+        quantity: 1,
+      });
+      if (confirm("장바구니에 담았습니다. 장바구니로 이동하시겠습니까?")) {
+        router.push("/cart");
+      }
+    }
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="grid gap-10 md:grid-cols-2 lg:gap-16">
@@ -92,6 +123,13 @@ export default function ProductDetailPage() {
                 : liked
                   ? "♥ 좋아요 취소"
                   : "♡ 좋아요"}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleAddToCart}
+              disabled={addToCartMutation.isPending}
+            >
+              {addToCartMutation.isPending ? "담는 중..." : "🛒 장바구니 담기"}
             </Button>
             <Link href="/products">
               <Button variant="secondary">목록으로</Button>
