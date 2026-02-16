@@ -3,3 +3,7 @@ export interface BrandResponse {
   name: string;
   description: string;
 }
+
+export interface BrandListResponse {
+  brands: BrandResponse[];
+}

@@ -1,9 +1,16 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getBrand } from "./api";
+import { getBrands, getBrand } from "./api";
 
 const brandKey = ["brand"] as const;
+
+export function useBrandList() {
+  return useQuery({
+    queryKey: [...brandKey, "list"],
+    queryFn: getBrands,
+  });
+}
 
 export function useBrand(brandId: number | null) {
   return useQuery({
