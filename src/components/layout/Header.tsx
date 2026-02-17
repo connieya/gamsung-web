@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useAuthStore } from "@/features/auth/store";
 import { useMe } from "@/features/auth/hooks";
+import { useCart } from "@/features/cart/hooks";
+import { useCartStore } from "@/features/cart/store";
 
 function displayName(email: string | undefined): string {
   if (!email) return "";
@@ -15,6 +17,13 @@ export function Header() {
   const logout = useAuthStore((s) => s.logout);
   const { data: me } = useMe();
   const userName = displayName(me?.email);
+  
+  // 장바구니 아이템 개수
+  const { data: serverCart } = useCart();
+  const localCart = useCartStore((s) => s.items);
+  const cartItemCount = userId 
+    ? serverCart?.items?.length ?? 0
+    : localCart.length;
 
   return (
     <header className="sticky top-0 z-50 border-b border-brand-border bg-brand-white">
@@ -38,6 +47,14 @@ export function Header() {
           </Link>
           <Link href="/ranking" className="link-nav font-medium">
             랭킹
+          </Link>
+          <Link href="/cart" className="relative link-nav font-medium">
+            <span>장바구니</span>
+            {cartItemCount > 0 && (
+              <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-brand-black text-caption font-bold text-white">
+                {cartItemCount > 99 ? "99+" : cartItemCount}
+              </span>
+            )}
           </Link>
           {userId ? (
             <>

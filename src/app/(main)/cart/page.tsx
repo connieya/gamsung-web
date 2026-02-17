@@ -1,30 +1,33 @@
 "use client";
 
+import Link from "next/link";
 import { useCart, useUpdateCartItemQuantity, useRemoveCartItem, useClearCart } from "@/features/cart/hooks";
-import { useAuth } from "@/features/auth/store";
+import { useAuthStore } from "@/features/auth/store";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/features/cart/store";
+import { Button } from "@/components/ui/Button";
+import { Spinner } from "@/components/ui/Spinner";
 
 export default function CartPage() {
   const router = useRouter();
-  const { userId } = useAuth();
+  const userId = useAuthStore((s) => s.userId);
   
   // 로그인 상태면 서버 장바구니 사용, 아니면 로컬 스토어 사용
   const { data: serverCart, isLoading } = useCart();
-  const localCart = useCartStore((state) => ({
-    items: state.items,
-    getTotalAmount: state.getTotalAmount,
-    updateQuantity: state.updateQuantity,
-    removeItem: state.removeItem,
-    clearItems: state.clearItems,
-  }));
+  const localCartItems = useCartStore((state) => state.items);
+  const getLocalCartTotalAmount = useCartStore((state) => state.getTotalAmount);
+  const updateLocalCartQuantity = useCartStore((state) => state.updateQuantity);
+  const removeLocalCartItem = useCartStore((state) => state.removeItem);
+  const clearLocalCartItems = useCartStore((state) => state.clearItems);
 
   const updateQuantityMutation = useUpdateCartItemQuantity();
   const removeItemMutation = useRemoveCartItem();
   const clearCartMutation = useClearCart();
 
   const isLoggedIn = !!userId;
-  const cart = isLoggedIn ? serverCart : { items: localCart.items, totalAmount: localCart.getTotalAmount() };
+  const cart = isLoggedIn 
+    ? serverCart 
+    : { items: localCartItems, totalAmount: getLocalCartTotalAmount() };
   const items = cart?.items ?? [];
 
   const handleQuantityChange = (itemId: number | undefined, productId: number, newQuantity: number) => {
@@ -33,7 +36,7 @@ export default function CartPage() {
     if (isLoggedIn && itemId) {
       updateQuantityMutation.mutate({ itemId, quantity: newQuantity });
     } else {
-      localCart.updateQuantity(productId, newQuantity);
+      updateLocalCartQuantity(productId, newQuantity);
     }
   };
 
@@ -41,7 +44,7 @@ export default function CartPage() {
     if (isLoggedIn && itemId) {
       removeItemMutation.mutate(itemId);
     } else {
-      localCart.removeItem(productId);
+      removeLocalCartItem(productId);
     }
   };
 
@@ -49,7 +52,7 @@ export default function CartPage() {
     if (isLoggedIn) {
       clearCartMutation.mutate();
     } else {
-      localCart.clearItems();
+      clearLocalCartItems();
     }
   };
 
@@ -58,21 +61,25 @@ export default function CartPage() {
       alert("장바구니가 비어있습니다.");
       return;
     }
-    router.push("/order/new");
+    router.push("/order/order-form");
   };
 
   if (isLoading && isLoggedIn) {
-    return <div className="container mx-auto p-6">로딩 중...</div>;
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">장바구니</h1>
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-display font-bold text-brand-black">장바구니</h1>
         {items.length > 0 && (
           <button
             onClick={handleClearCart}
-            className="text-sm text-red-600 hover:underline"
+            className="text-body text-red-600 hover:underline transition-colors"
           >
             전체 삭제
           </button>
@@ -80,20 +87,23 @@ export default function CartPage() {
       </div>
 
       {items.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
-          장바구니가 비어있습니다.
+        <div className="text-center py-16">
+          <p className="text-body text-brand-gray mb-6">장바구니가 비어있습니다.</p>
+          <Link href="/products">
+            <Button>쇼핑 계속하기</Button>
+          </Link>
         </div>
       ) : (
         <>
-          <div className="space-y-4 mb-6">
+          <div className="space-y-4 mb-8">
             {items.map((item) => (
               <div
                 key={item.productId}
-                className="flex items-center gap-4 p-4 border rounded-lg"
+                className="flex items-center gap-4 p-4 rounded-xl border border-brand-border bg-brand-white"
               >
                 <div className="flex-1">
-                  <h3 className="font-medium">{item.productName}</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="text-body font-medium text-brand-black">{item.productName}</h3>
+                  <p className="text-caption text-brand-gray mt-1">
                     {item.price.toLocaleString()}원
                   </p>
                 </div>
@@ -103,31 +113,34 @@ export default function CartPage() {
                     onClick={() =>
                       handleQuantityChange(item.itemId, item.productId, item.quantity - 1)
                     }
-                    className="w-8 h-8 border rounded hover:bg-gray-100"
+                    className="w-8 h-8 border border-brand-border rounded-lg hover:bg-brand-bg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={item.quantity <= 1}
                   >
                     -
                   </button>
-                  <span className="w-12 text-center">{item.quantity}</span>
+                  <span className="w-12 text-center text-body font-medium text-brand-black">
+                    {item.quantity}
+                  </span>
                   <button
                     onClick={() =>
                       handleQuantityChange(item.itemId, item.productId, item.quantity + 1)
                     }
-                    className="w-8 h-8 border rounded hover:bg-gray-100"
+                    className="w-8 h-8 border border-brand-border rounded-lg hover:bg-brand-bg transition-colors"
                   >
                     +
                   </button>
                 </div>
 
-                <div className="text-right min-w-[100px]">
-                  <p className="font-medium">
+                <div className="text-right min-w-[120px]">
+                  <p className="text-title font-semibold text-brand-black">
                     {(item.price * item.quantity).toLocaleString()}원
                   </p>
                 </div>
 
                 <button
                   onClick={() => handleRemoveItem(item.itemId, item.productId)}
-                  className="text-gray-400 hover:text-red-600"
+                  className="text-brand-gray hover:text-red-600 transition-colors p-2"
+                  aria-label="삭제"
                 >
                   ✕
                 </button>
@@ -135,19 +148,20 @@ export default function CartPage() {
             ))}
           </div>
 
-          <div className="border-t pt-4">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-lg font-medium">총 금액</span>
-              <span className="text-2xl font-bold text-blue-600">
+          <div className="rounded-xl border border-brand-border bg-brand-bg p-6">
+            <div className="flex justify-between items-center mb-6">
+              <span className="text-title font-semibold text-brand-black">총 금액</span>
+              <span className="text-display font-bold text-brand-black">
                 {cart?.totalAmount.toLocaleString()}원
               </span>
             </div>
-            <button
+            <Button
               onClick={handleCheckout}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700"
+              className="w-full"
+              size="lg"
             >
               주문하기
-            </button>
+            </Button>
           </div>
         </>
       )}
