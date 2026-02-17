@@ -93,6 +93,14 @@ export default function ProductDetailPage() {
     }
   };
 
+  const handleBuyNow = () => {
+    if (!data) return;
+    
+    // 장바구니를 거치지 않고 바로 주문서 작성 페이지로 이동
+    // 상품 ID와 수량을 URL 파라미터로 전달
+    router.push(`/order/order-form?productId=${productId}&quantity=1`);
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="grid gap-10 md:grid-cols-2 lg:gap-16">
@@ -117,9 +125,29 @@ export default function ProductDetailPage() {
             <span>♥ {data.likeCount ?? 0}</span>
             {data.rank != null && <span>랭크 #{data.rank}</span>}
           </div>
-          <div className="mt-8 flex gap-3">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button
-              variant={likesReady && liked ? "secondary" : "primary"}
+              variant="primary"
+              onClick={handleBuyNow}
+              disabled={addToCartMutation.isPending}
+              size="lg"
+              className="flex-1"
+            >
+              {addToCartMutation.isPending ? "처리 중..." : "바로 구매하기"}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={handleAddToCart}
+              disabled={addToCartMutation.isPending}
+              size="lg"
+              className="flex-1"
+            >
+              {addToCartMutation.isPending ? "담는 중..." : "🛒 장바구니 담기"}
+            </Button>
+          </div>
+          <div className="mt-4 flex gap-3">
+            <Button
+              variant={likesReady && liked ? "secondary" : "ghost"}
               onClick={handleLike}
               disabled={userId != null && !likesReady}
               aria-label={
@@ -132,15 +160,10 @@ export default function ProductDetailPage() {
                   ? "♥ 좋아요 취소"
                   : "♡ 좋아요"}
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleAddToCart}
-              disabled={addToCartMutation.isPending}
-            >
-              {addToCartMutation.isPending ? "담는 중..." : "🛒 장바구니 담기"}
-            </Button>
-            <Link href="/products">
-              <Button variant="secondary">목록으로</Button>
+            <Link href="/products" className="flex-1">
+              <Button variant="ghost" className="w-full">
+                목록으로
+              </Button>
             </Link>
           </div>
         </div>
