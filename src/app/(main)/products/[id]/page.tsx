@@ -95,10 +95,27 @@ export default function ProductDetailPage() {
 
   const handleBuyNow = () => {
     if (!data) return;
-    
-    // 장바구니를 거치지 않고 바로 주문서 작성 페이지로 이동
-    // 상품 ID와 수량을 URL 파라미터로 전달
-    router.push(`/order/order-form?productId=${productId}&quantity=1`);
+
+    if (userId) {
+      addToCartMutation.mutate(
+        { productId, quantity: 1 },
+        {
+          onSuccess: (cart) => {
+            const addedItem = cart.items.find((item) => item.productId === productId);
+            if (addedItem?.itemId) {
+              router.push(`/order/order-form?cartItemIds=${addedItem.itemId}`);
+            }
+          },
+          onError: (error) => {
+            console.error(error);
+            alert("구매하기 처리 중 오류가 발생했습니다.");
+          },
+        }
+      );
+    } else {
+      alert("로그인이 필요합니다.");
+      router.push("/login");
+    }
   };
 
   return (

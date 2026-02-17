@@ -1,71 +1,25 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useCart } from "@/features/cart/hooks";
-import { useCartStore } from "@/features/cart/store";
 import { useAuthStore } from "@/features/auth/store";
-import { usePlaceOrder } from "@/features/order/hooks";
-import { issueOrderNo } from "@/features/order/api";
-import { useProductDetail } from "@/features/product/hooks";
+import { getOrderForm, issueOrderNo, readyOrder, createPaymentSession } from "@/features/order/api";
+import type { OrderFormResponse } from "@/features/order/types";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { Input } from "@/components/ui/Input";
 import { PaymentModal } from "@/components/domain/PaymentModal";
 
-export default function OrderNewPage() {
+export default function OrderFormPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const userId = useAuthStore((s) => s.userId);
   const isLoggedIn = !!userId;
 
-  // URL 파라미터에서 productId와 quantity 추출 (바로 구매 시)
-  const buyNowProductId = searchParams?.get("productId") ? Number(searchParams.get("productId")) : null;
-  const buyNowQuantity = searchParams?.get("quantity") ? Number(searchParams.get("quantity")) : 1;
-
-  // 바로 구매 상품 정보 조회
-  const { data: buyNowProduct, isLoading: buyNowProductLoading } = useProductDetail(buyNowProductId);
-
-  // 서버 장바구니 또는 로컬 장바구니
-  const { data: serverCart, isLoading: serverCartLoading } = useCart();
-  const localCartItems = useCartStore((state) => state.items);
-  const getLocalCartTotalAmount = useCartStore((state) => state.getTotalAmount);
-
-  // 주문 상품 목록 결정 (바로 구매 상품이 있으면 그것만, 없으면 장바구니 전체)
-  const { items, totalAmount, isLoading } = useMemo(() => {
-    if (buyNowProductId) {
-      if (buyNowProductLoading) return { items: [], totalAmount: 0, isLoading: true };
-      if (!buyNowProduct) return { items: [], totalAmount: 0, isLoading: false };
-      
-      const item = {
-        productId: buyNowProduct.productId,
-        productName: buyNowProduct.productName,
-        price: buyNowProduct.price,
-        quantity: buyNowQuantity,
-      };
-      return { 
-        items: [item], 
-        totalAmount: item.price * item.quantity,
-        isLoading: false 
-      };
-    }
-
-    const cart = isLoggedIn 
-      ? serverCart 
-      : { items: localCartItems, totalAmount: getLocalCartTotalAmount() };
-    
-    return { 
-      items: cart?.items ?? [], 
-      totalAmount: cart?.totalAmount ?? 0,
-      isLoading: isLoggedIn ? serverCartLoading : false 
-    };
-  }, [
-    buyNowProductId, buyNowProduct, buyNowProductLoading, buyNowQuantity, 
-    isLoggedIn, serverCart, serverCartLoading, localCartItems, getLocalCartTotalAmount
-  ]);
-
-  const placeOrderMutation = usePlaceOrder();
+  const [orderFormData, setOrderFormData] = useState<OrderFormResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 배송지 정보
   const [recipientName, setRecipientName] = useState("");
@@ -74,8 +28,45 @@ export default function OrderNewPage() {
 
   // 결제 모달 상태
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [createdOrderId, setCreatedOrderId] = useState<number | null>(null);
-  const [issuedOrderNo, setIssuedOrderNo] = useState<string | null>(null);
+  const [orderNo, setOrderNo] = useState<string | null>(null);
+  const [orderKey, setOrderKey] = useState<string | null>(null);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      alert("로그인이 필요합니다.");
+      router.push("/login");
+      return;
+    }
+
+    if (!userId) {
+      return;
+    }
+
+    const cartItemIdsParam = searchParams.get("cartItemIds");
+    if (!cartItemIdsParam) {
+      alert("주문할 상품이 선택되지 않았습니다.");
+      router.push("/cart");
+      return;
+    }
+
+    const cartItemIds = cartItemIdsParam.split(",").map(Number);
+    const timestamp = Date.now();
+    getOrderForm(userId, cartItemIds, timestamp)
+      .then((data) => {
+        setOrderFormData(data);
+        if (data.member.name) {
+          setRecipientName(data.member.name);
+        }
+      })
+      .catch((error) => {
+        console.error("주문서 로드 실패:", error);
+        alert("주문서를 불러오는데 실패했습니다.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [isLoggedIn, userId, searchParams, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,59 +76,56 @@ export default function OrderNewPage() {
       return;
     }
 
-    if (items.length === 0) {
-      alert("주문할 상품이 없습니다.");
+    if (!orderFormData || !userId) {
       return;
     }
 
-    if (!isLoggedIn) {
-      alert("로그인이 필요합니다.");
-      // 현재 페이지 정보를 유지하면서 로그인 페이지로 이동 (나중에 돌아오기 위해)
-      const currentPath = window.location.pathname + window.location.search;
-      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
-      return;
-    }
+    setIsSubmitting(true);
 
-    if (!userId) return;
-
-    // 1) Musinsa-like: 주문번호(orderNo) 선발급
-    let orderNoToUse: string | undefined;
     try {
-      const issued = await issueOrderNo(userId, { isNewOrderForm: true });
-      orderNoToUse = issued.orderNo;
-      setIssuedOrderNo(issued.orderNo);
-    } catch (e) {
-      console.error(e);
-      // 선발급 실패 시에도 기존 플로우로 진행(백엔드에서 orderNumber 생성)
-    }
+      // 1. 주문번호 발급
+      const issueResult = await issueOrderNo(userId, { isNewOrderForm: true });
+      setOrderNo(issueResult.orderNo);
+      setOrderKey(issueResult.orderKey);
 
-    // 주문 생성 API 호출
-    placeOrderMutation.mutate(
-      {
-        orderNo: orderNoToUse,
-        couponId: null,
-        orderItems: items.map((item) => ({
+      // 2. ready - 주문 생성
+      await readyOrder(userId, issueResult.orderNo, {
+        paymentMethod: "CARD",
+        orderKey: issueResult.orderKey,
+        orderItems: orderFormData.cartItems.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
         })),
-      },
-      {
-        onSuccess: (result) => {
-          const orderId = result.orderId;
-          setCreatedOrderId(orderId);
-          // 결제 모달 열기
-          setIsPaymentModalOpen(true);
-        },
-        onError: (error) => {
-          console.error(error);
-          alert("주문 생성 중 오류가 발생했습니다.");
-        },
-      }
-    );
+        couponId: null,
+      });
+
+      // 3. payment-session
+      const sessionResult = await createPaymentSession(userId, {
+        orderNo: issueResult.orderNo,
+        orderKey: issueResult.orderKey,
+        paymentMethod: "CARD",
+        cardType: "CREDIT",
+        cardNumber: "1234-5678-9012-3456",
+        couponId: null,
+      });
+
+      setPaymentUrl(sessionResult.paymentUrl);
+
+      // 4. 결제 모달 열기
+      setIsPaymentModalOpen(true);
+    } catch (error) {
+      console.error("결제 준비 실패:", error);
+      alert("결제 준비 중 오류가 발생했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePaymentSuccess = () => {
     setIsPaymentModalOpen(false);
+    if (orderNo) {
+      router.push(`/order/order_result/${orderNo}`);
+    }
   };
 
   if (isLoading) {
@@ -148,12 +136,12 @@ export default function OrderNewPage() {
     );
   }
 
-  if (items.length === 0) {
+  if (!orderFormData) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <h1 className="text-display font-bold text-brand-black mb-6">주문서 작성</h1>
         <div className="text-center py-12 text-brand-gray">
-          주문할 상품이 없습니다.
+          주문 정보를 불러올 수 없습니다.
         </div>
         <Link href="/products">
           <Button className="w-full" size="lg">
@@ -169,14 +157,16 @@ export default function OrderNewPage() {
       <h1 className="text-display font-bold text-brand-black mb-8">주문서 작성</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* 주문 상품 목록 */}
+        {/* 주문 상품 */}
         <section className="rounded-xl border border-brand-border bg-brand-white p-6">
           <h2 className="text-title font-semibold text-brand-black mb-4">주문 상품</h2>
           <div className="space-y-4">
-            {items.map((item) => (
-              <div key={item.productId} className="flex justify-between items-center py-3 border-b border-brand-border last:border-0">
+            {orderFormData.cartItems.map((item) => (
+              <div key={item.cartId} className="flex justify-between items-center py-3 border-b border-brand-border last:border-0">
                 <div className="flex-1">
-                  <p className="text-body font-medium text-brand-black">{item.productName}</p>
+                  <p className="text-body font-medium text-brand-black">
+                    {item.productName}
+                  </p>
                   <p className="text-caption text-brand-gray mt-1">
                     {item.price.toLocaleString()}원 × {item.quantity}
                   </p>
@@ -225,7 +215,7 @@ export default function OrderNewPage() {
           <div className="flex justify-between items-center">
             <span className="text-title font-semibold text-brand-black">총 결제 금액</span>
             <span className="text-display font-bold text-brand-black">
-              {totalAmount.toLocaleString()}원
+              {orderFormData.totalAmount.toLocaleString()}원
             </span>
           </div>
         </section>
@@ -234,12 +224,12 @@ export default function OrderNewPage() {
           type="submit"
           className="w-full"
           size="lg"
-          disabled={placeOrderMutation.isPending}
+          disabled={isSubmitting}
         >
-          {placeOrderMutation.isPending ? (
+          {isSubmitting ? (
             <>
               <Spinner size="sm" className="mr-2" />
-              주문 처리 중...
+              결제 준비 중...
             </>
           ) : (
             "결제하기"
@@ -248,15 +238,16 @@ export default function OrderNewPage() {
       </form>
 
       {/* 결제 모달 */}
-      {createdOrderId && (
+      {orderNo && orderKey && (
         <PaymentModal
           isOpen={isPaymentModalOpen}
           onClose={() => setIsPaymentModalOpen(false)}
-          orderId={createdOrderId}
+          orderNo={orderNo}
           recipientName={recipientName}
           address={address}
           phone={phone}
-          totalAmount={totalAmount}
+          totalAmount={orderFormData.totalAmount}
+          paymentUrl={paymentUrl}
           onPaymentSuccess={handlePaymentSuccess}
         />
       )}

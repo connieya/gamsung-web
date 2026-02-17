@@ -58,3 +58,51 @@ export interface OrderItemDto {
   productId: number;
   quantity: number;
 }
+
+export interface OrderFormResponse {
+  member: {
+    name: string;
+    email: string;
+  };
+  cartItems: Array<{
+    cartId: number;
+    productId: number;
+    productName: string;
+    quantity: number;
+    price: number;
+    imageUrl: string;
+  }>;
+  totalAmount: number;
+}
+
+export interface OrderReadyRequest {
+  paymentMethod: "CARD" | "POINT";
+  orderKey: string;
+  orderItems: Array<{
+    productId: number;
+    quantity: number;
+  }>;
+  couponId?: number | null;
+}
+
+export interface OrderReadyResponse {
+  paymentId: number;
+  paymentStatus: string;
+}
+
+export interface OrderPaymentSessionRequest {
+  orderNo: string;
+  orderKey: string;
+  paymentMethod: "CARD" | "POINT";
+  cardType?: "CREDIT" | "DEBIT";
+  cardNumber?: string;
+  couponId?: number | null;
+}
+
+export interface OrderPaymentSessionResponse {
+  orderNo: string;
+  paymentKey: string;
+  amount: number;
+  paymentUrl: string;
+  pgKind: string;
+}
