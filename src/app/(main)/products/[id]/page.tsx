@@ -75,7 +75,7 @@ export default function ProductDetailPage() {
         {
           onSuccess: () => {
             if (confirm("장바구니에 담았습니다. 장바구니로 이동하시겠습니까?")) {
-              router.push("/cart");
+              router.push("/orders/cart");
             }
           },
         }
@@ -88,7 +88,7 @@ export default function ProductDetailPage() {
         quantity: 1,
       });
       if (confirm("장바구니에 담았습니다. 장바구니로 이동하시겠습니까?")) {
-        router.push("/cart");
+        router.push("/orders/cart");
       }
     }
   };

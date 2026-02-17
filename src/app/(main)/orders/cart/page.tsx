@@ -61,11 +61,7 @@ export default function CartPage() {
       alert("장바구니가 비어있습니다.");
       return;
     }
-    const cartItemIds = items
-      .filter((item) => item.itemId != null)
-      .map((item) => item.itemId)
-      .join(",");
-    router.push(`/order/order-form?cartItemIds=${cartItemIds}`);
+    router.push("/order/order-form");
   };
 
   if (isLoading && isLoggedIn) {

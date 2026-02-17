@@ -46,7 +46,7 @@ export default function OrderFormPage() {
     const cartItemIdsParam = searchParams.get("cartItemIds");
     if (!cartItemIdsParam) {
       alert("주문할 상품이 선택되지 않았습니다.");
-      router.push("/cart");
+      router.push("/orders/cart");
       return;
     }
 

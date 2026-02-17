@@ -48,7 +48,7 @@ export function Header() {
           <Link href="/ranking" className="link-nav font-medium">
             랭킹
           </Link>
-          <Link href="/cart" className="relative link-nav font-medium">
+          <Link href="/orders/cart" className="relative link-nav font-medium">
             <span>장바구니</span>
             {cartItemCount > 0 && (
               <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-brand-black text-caption font-bold text-white">
