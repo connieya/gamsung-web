@@ -18,12 +18,12 @@ export function Header() {
   const { data: me } = useMe();
   const userName = displayName(me?.email);
   
-  // 장바구니 아이템 개수
+  // 장바구니 총 수량(같은 상품 수량 증가도 배지에 반영)
   const { data: serverCart } = useCart();
   const localCart = useCartStore((s) => s.items);
   const cartItemCount = userId 
-    ? serverCart?.items?.length ?? 0
-    : localCart.length;
+    ? (serverCart?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0)
+    : localCart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <header className="sticky top-0 z-50 border-b border-brand-border bg-brand-white">

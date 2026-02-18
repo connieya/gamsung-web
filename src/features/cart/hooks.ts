@@ -31,7 +31,9 @@ export function useAddToCart() {
   return useMutation({
     mutationFn: (request: AddToCartRequest) =>
       addToCart(userId!, request),
-    onSuccess: () => {
+    onSuccess: (cart) => {
+      // Reflect the latest cart immediately so header badge updates without delay.
+      queryClient.setQueryData(cartKeys.detail(userId), cart);
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
     },
   });
