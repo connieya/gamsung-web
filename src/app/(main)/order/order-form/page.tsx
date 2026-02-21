@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/features/auth/store";
 import { getOrderForm, issueOrderNo, readyOrder, createPaymentSession } from "@/features/order/api";
@@ -10,12 +10,14 @@ import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { Input } from "@/components/ui/Input";
 import { PaymentModal } from "@/components/domain/PaymentModal";
+import { useOrderFlowStore } from "@/features/order/store";
 
 export default function OrderFormPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const userId = useAuthStore((s) => s.userId);
   const isLoggedIn = !!userId;
+  const buyNowCartItemId = useOrderFlowStore((s) => s.buyNowCartItemId);
+  const clearBuyNowCartItemId = useOrderFlowStore((s) => s.clearBuyNowCartItemId);
 
   const [orderFormData, setOrderFormData] = useState<OrderFormResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,16 +45,8 @@ export default function OrderFormPage() {
       return;
     }
 
-    const cartItemIdsParam = searchParams.get("cartItemIds");
-    if (!cartItemIdsParam) {
-      alert("주문할 상품이 선택되지 않았습니다.");
-      router.push("/orders/cart");
-      return;
-    }
-
-    const cartItemIds = cartItemIdsParam.split(",").map(Number);
     const timestamp = Date.now();
-    getOrderForm(userId, cartItemIds, timestamp)
+    getOrderForm(userId, buyNowCartItemId, timestamp)
       .then((data) => {
         setOrderFormData(data);
         if (data.member.name) {
@@ -64,9 +58,10 @@ export default function OrderFormPage() {
         alert("주문서를 불러오는데 실패했습니다.");
       })
       .finally(() => {
+        clearBuyNowCartItemId();
         setIsLoading(false);
       });
-  }, [isLoggedIn, userId, searchParams, router]);
+  }, [isLoggedIn, userId, buyNowCartItemId, clearBuyNowCartItemId, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,28 +83,31 @@ export default function OrderFormPage() {
       setOrderNo(issueResult.orderNo);
       setOrderKey(issueResult.orderKey);
 
-      // 2. ready - 주문 생성
-      await readyOrder(userId, issueResult.orderNo, {
-        paymentMethod: "CARD",
-        orderKey: issueResult.orderKey,
-        orderItems: orderFormData.cartItems.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-        })),
-        couponId: null,
-      });
+      const orderItems = orderFormData.cartItems.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      }));
 
-      // 3. payment-session
+      // 2. payment-session
       const sessionResult = await createPaymentSession(userId, {
         orderNo: issueResult.orderNo,
         orderKey: issueResult.orderKey,
         paymentMethod: "CARD",
+        orderItems,
         cardType: "CREDIT",
         cardNumber: "1234-5678-9012-3456",
         couponId: null,
       });
 
       setPaymentUrl(sessionResult.paymentUrl);
+
+      // 3. ready - 최종 결제 준비
+      await readyOrder(userId, issueResult.orderNo, {
+        paymentMethod: "CARD",
+        orderKey: issueResult.orderKey,
+        orderItems,
+        couponId: null,
+      });
 
       // 4. 결제 모달 열기
       setIsPaymentModalOpen(true);

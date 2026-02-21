@@ -9,6 +9,7 @@ import { useAuthStore } from "@/features/auth/store";
 import { useAddLike, useRemoveLike, useMyLikes } from "@/features/likes/hooks";
 import { useAddToCart } from "@/features/cart/hooks";
 import { useCartStore } from "@/features/cart/store";
+import { useOrderFlowStore } from "@/features/order/store";
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat("ko-KR").format(price) + "원";
@@ -32,6 +33,7 @@ export default function ProductDetailPage() {
   const removeLike = useRemoveLike();
   const addToCartMutation = useAddToCart();
   const addToLocalCart = useCartStore((s) => s.addItem);
+  const setBuyNowCartItemId = useOrderFlowStore((s) => s.setBuyNowCartItemId);
 
   if (productId == null || isError) {
     return (
@@ -103,7 +105,8 @@ export default function ProductDetailPage() {
           onSuccess: (cart) => {
             const addedItem = cart.items.find((item) => item.productId === productId);
             if (addedItem?.itemId) {
-              router.push(`/order/order-form?cartItemIds=${addedItem.itemId}`);
+              setBuyNowCartItemId(addedItem.itemId);
+              router.push("/order/order-form");
             }
           },
           onError: (error) => {

@@ -94,6 +94,10 @@ export interface OrderPaymentSessionRequest {
   orderNo: string;
   orderKey: string;
   paymentMethod: "CARD" | "POINT";
+  orderItems: Array<{
+    productId: number;
+    quantity: number;
+  }>;
   cardType?: "CREDIT" | "DEBIT";
   cardNumber?: string;
   couponId?: number | null;

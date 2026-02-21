@@ -34,11 +34,13 @@ export async function issueOrderNo(
 
 export async function getOrderForm(
   userId: string,
-  cartItemIds: number[],
+  buyNowCartItemId: number | null,
   timestamp: number
 ): Promise<OrderFormResponse> {
   const params = new URLSearchParams();
-  cartItemIds.forEach((id) => params.append("cartItemIds", String(id)));
+  if (buyNowCartItemId !== null) {
+    params.append("buyNowCartItemId", String(buyNowCartItemId));
+  }
   params.append("t", String(timestamp));
   return client.get<OrderFormResponse>(
     `/orders/order-form?${params.toString()}`,
