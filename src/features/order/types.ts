@@ -77,6 +77,7 @@ export interface OrderFormResponse {
 
 export interface OrderReadyRequest {
   paymentMethod: "CARD" | "POINT";
+  payKind?: "CARD" | "POINT" | "KAKAOPAY" | "TOSSPAY" | "NAVERPAY" | "PAYCO";
   orderKey: string;
   orderItems: Array<{
     productId: number;
@@ -94,11 +95,12 @@ export interface OrderPaymentSessionRequest {
   orderNo: string;
   orderKey: string;
   paymentMethod: "CARD" | "POINT";
+  payKind?: "CARD" | "POINT" | "KAKAOPAY" | "TOSSPAY" | "NAVERPAY" | "PAYCO";
   orderItems: Array<{
     productId: number;
     quantity: number;
   }>;
-  cardType?: "CREDIT" | "DEBIT";
+  cardType?: "SAMSUNG" | "KB" | "HYUNDAI" | "SHINHAN";
   cardNumber?: string;
   couponId?: number | null;
 }

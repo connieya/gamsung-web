@@ -94,6 +94,7 @@ export default function OrderFormPage() {
       // 2. ready - 주문 전체 정보를 서버에 등록
       await readyOrder(userId, issueResult.orderNo, {
         paymentMethod: "CARD",
+        payKind: "CARD",
         orderKey: issueResult.orderKey,
         orderItems,
         couponId: null,
@@ -104,8 +105,9 @@ export default function OrderFormPage() {
         orderNo: issueResult.orderNo,
         orderKey: issueResult.orderKey,
         paymentMethod: "CARD",
+        payKind: "CARD",
         orderItems,
-        cardType: "CREDIT",
+        cardType: "SAMSUNG",
         cardNumber: "1234-5678-9012-3456",
         couponId: null,
       });

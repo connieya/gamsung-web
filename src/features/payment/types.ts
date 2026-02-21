@@ -1,9 +1,11 @@
-export type PaymentMethod = "CARD" | "POINT";
-export type CardType = "CREDIT" | "DEBIT";
+export type PaymentMethod = "CARD" | "POINT" | "ACCOUNT" | "SIMPLE_PAY";
+export type PayKind = "CARD" | "POINT" | "ACCOUNT_TRANSFER" | "KAKAOPAY" | "TOSSPAY" | "NAVERPAY" | "PAYCO";
+export type CardType = "SAMSUNG" | "KB" | "HYUNDAI" | "SHINHAN";
 
 export interface PaymentRequest {
   orderId: number;
   paymentMethod: PaymentMethod;
+  payKind: PayKind;
   cardType?: CardType;
   cardNumber?: string;
 }
