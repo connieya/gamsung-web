@@ -1,42 +1,157 @@
 ---
-description: 프로젝트 구조 변경 시 README.md 동기화
+description: 프론트엔드 아키텍처 구조 변경 시 README.md 자동 동기화
 globs: "**/src/**"
-alwaysApply: false
+alwaysApply: true
 ---
 
-# README 동기화 규칙
+# 프론트엔드 아키텍처 README 동기화 규칙
 
 ## 원칙
 
-**프로젝트 구조가 바뀌면 README.md를 바로 반영한다.**
+**프론트엔드 아키텍처 구조나 설계가 변경되면 README.md의 "프로젝트 구조" 섹션을 즉시 반영한다.**
 
-## 적용 시점
+## 자동 동기화 적용 시점
 
-다음과 같은 변경이 있을 때 README.md를 수정한다.
+다음과 같은 변경이 있을 때 **반드시** README.md를 업데이트한다:
 
-- **app/** 아래 라우트·폴더·페이지 추가/삭제/이동
+### 1. 디렉터리 구조 변경
+- **app/** 아래 라우트 그룹·폴더·페이지 추가/삭제/이동
+  - 예: `(auth)`, `(main)` 그룹 변경, 새 라우트 추가 (`/new-page`)
 - **components/** 아래 디렉터리·주요 컴포넌트 추가/삭제
-- **features/** 아래 도메인(폴더) 추가/삭제 또는 api/hooks/types 구성 변경
+  - 예: `ui/`, `domain/`, `layout/` 하위 컴포넌트 변경
+- **features/** 아래 도메인(폴더) 추가/삭제 또는 파일 구성 변경
+  - 예: 새 도메인 추가 (`features/payment/`), `api.ts`/`hooks.ts`/`types.ts`/`store.ts` 구성 변경
 - **lib/**, **types/** 아래 공개 API·디렉터리 변경
-- 루트 설정 파일·스크립트·환경 변수 변경 (package.json, .env.example 등)
+  - 예: `lib/api/` 하위 파일 추가, `types/` 하위 타입 파일 추가
 
-## README.md에서 수정할 섹션
+### 2. 아키텍처 설계 변경
+- 레이어 규칙 변경 (`.cursor/rules/architecture.mdc` 수정 시)
+- 의존성 방향 변경
+- 네이밍 컨벤션 변경
 
-1. **프로젝트 구조**  
-   - `src/` 트리(폴더·대표 파일)를 실제 구조에 맞게 갱신한다.  
-   - 새 라우트·feature·컴포넌트 디렉터리를 반영한다.
+### 3. 설정·의존성 변경
+- `package.json` 의존성 추가/제거 (기술 스택 섹션 반영)
+- 환경 변수 추가/변경 (환경 변수 섹션 반영)
+- 새 라우트 추가 (주요 화면 섹션 반영)
 
-2. **주요 화면**  
-   - 새 페이지·경로가 생기면 표에 경로와 설명을 추가한다.  
-   - 삭제·이동한 경로는 표에서 제거하거나 수정한다.
+## README.md 동기화 방법
 
-3. **기술 스택·실행 방법·환경 변수**  
-   - 의존성·스크립트·env가 바뀌면 해당 섹션을 수정한다.
+### 1. 프로젝트 구조 섹션 업데이트
+
+**실제 디렉터리 구조를 스캔하여 README.md의 트리 구조를 생성한다:**
+
+```bash
+# src/ 디렉터리 구조 확인
+tree -L 3 -I 'node_modules' src/
+# 또는
+find src -type d | sort
+```
+
+**README.md 업데이트 규칙:**
+- `src/` 트리 구조를 실제 디렉터리와 일치시킨다
+- 주요 파일(`page.tsx`, `layout.tsx`, `api.ts`, `hooks.ts` 등)만 표시
+- 주석으로 각 디렉터리 역할 설명 추가
+- `features/` 하위는 도메인 폴더만 나열하고, 내부 파일(`api.ts`, `hooks.ts` 등)은 설명으로 통일
+
+**예시 (현재 구조 기준):**
+```
+src/
+├── app/                      # 라우트·레이아웃·페이지
+│   ├── (auth)/               # 로그인·회원가입 (레이아웃: 중앙 카드)
+│   │   ├── login/
+│   │   ├── join/
+│   │   └── layout.tsx
+│   ├── (main)/               # 메인·상품·마이 (레이아웃: Header + Footer)
+│   │   ├── page.tsx          # 홈
+│   │   ├── products/         # 상품 목록·상세
+│   │   ├── brands/[id]/      # 브랜드 페이지
+│   │   ├── ranking/          # 인기 랭킹
+│   │   ├── my-page/          # 마이·주문·좋아요·포인트
+│   │   └── layout.tsx
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── providers.tsx
+├── components/
+│   ├── ui/                   # Button, Input, Spinner, Modal
+│   ├── domain/               # ProductCard, BrandCard, PaymentModal
+│   └── layout/               # Header, Footer, GlobalMenuModal
+├── features/                 # 도메인별 API·훅·타입
+│   ├── auth/                 # 회원가입·로그인·useAuthStore
+│   ├── product/
+│   ├── brand/
+│   ├── likes/
+│   ├── order/
+│   ├── payment/
+│   ├── point/
+│   └── ranking/
+├── lib/
+│   └── api/                  # client, headers (X-USER-ID)
+└── types/
+    └── api.ts                # ApiResponse 등 공통 타입
+```
+
+### 2. 주요 화면 섹션 업데이트
+
+새 라우트가 추가되면 표에 경로와 설명을 추가:
+
+```markdown
+| 경로              | 설명                                 |
+| ----------------- | ------------------------------------ |
+| `/`               | 홈 (신상품·인기상품)                  |
+| `/products`       | 상품 목록 (정렬·페이지네이션·좋아요) |
+| `/products/[id]`  | 상품 상세                            |
+| `/brands/[id]`    | 브랜드 소개·상품 목록                |
+| `/ranking`        | 인기 랭킹                            |
+| `/login`, `/join` | 로그인(데모: X-USER-ID), 회원가입    |
+| `/my-page`        | 마이 (주문·좋아요·포인트)            |
+```
+
+### 3. 기술 스택 섹션 업데이트
+
+`package.json` 의존성이 변경되면 기술 스택 섹션을 갱신:
+
+```markdown
+## 기술 스택
+
+- **Next.js 14** (App Router)
+- **React 18**, **TypeScript**
+- **Tailwind CSS**
+- **TanStack Query** (서버 상태)
+- **Zustand** (클라이언트 상태·인증)
+```
+
+### 4. 레이어 규칙 설명 업데이트
+
+아키텍처 규칙이 변경되면 README.md 하단의 설명도 함께 수정:
+
+```markdown
+- **app**: 페이지·레이아웃만. 비즈니스 로직·상태는 `features`/`hooks`로 위임.
+- **components**: props 기반 presentational. API·전역 상태 직접 사용 지양.
+- **features**: `api.ts`, `hooks.ts`, `types.ts` 단위. 페이지/컴포넌트는 여기만 참조.
+- **lib**: fetch 래퍼·인증 헤더 등 도메인 무관 코드.
+```
+
+## 자동 동기화 체크리스트
+
+아키텍처 변경 작업 시 다음을 확인한다:
+
+- [ ] `src/` 디렉터리 구조 변경 여부 확인
+- [ ] README.md의 "프로젝트 구조" 섹션 트리 구조가 실제와 일치하는지 확인
+- [ ] 새 라우트가 추가되었다면 "주요 화면" 표에 경로 추가
+- [ ] `package.json` 의존성 변경 시 "기술 스택" 섹션 업데이트
+- [ ] `.cursor/rules/architecture.mdc` 변경 시 README.md의 레이어 규칙 설명도 동기화
+- [ ] 환경 변수 추가/변경 시 "환경 변수" 섹션 업데이트
 
 ## 작업 순서
 
-1. 구조/설정을 변경한 뒤,
-2. README.md를 열어 위 섹션 중 해당하는 부분을 수정하고,
-3. 커밋 시 README.md 변경을 포함한다.
+1. **아키텍처 구조 변경** (디렉터리 추가/삭제, 파일 이동 등)
+2. **실제 디렉터리 구조 확인** (`tree` 또는 `find` 명령어 사용)
+3. **README.md 열기** 및 "프로젝트 구조" 섹션 업데이트
+4. **관련 섹션 동기화** (주요 화면, 기술 스택, 환경 변수 등)
+5. **커밋 시 README.md 변경 포함**
 
-이렇게 하면 README가 항상 현재 프로젝트 구조를 반영하게 된다.
+## 참고
+
+- 실제 디렉터리 구조는 `.cursor/rules/architecture.mdc`와도 일치해야 함
+- README.md는 프로젝트의 **현재 상태**를 정확히 반영해야 함
+- 구조 변경은 README.md 업데이트와 함께 커밋하는 것을 권장
