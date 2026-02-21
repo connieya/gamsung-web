@@ -3,17 +3,14 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { ProductCard } from "@/components/domain/ProductCard";
-import { BrandCard } from "@/components/domain/BrandCard";
 import { Spinner } from "@/components/ui/Spinner";
 import { useProductList } from "@/features/product/hooks";
 import { useRanking } from "@/features/ranking/hooks";
-import { useBrandList } from "@/features/brand/hooks";
 import { useAuthStore } from "@/features/auth/store";
 import { useAddLike, useRemoveLike, useMyLikes } from "@/features/likes/hooks";
 
 const NEW_PRODUCTS_COUNT = 8;
 const POPULAR_PRODUCTS_COUNT = 8;
-const BRANDS_COUNT = 12;
 
 export default function HomePage() {
   const userId = useAuthStore((s) => s.userId);
@@ -36,9 +33,6 @@ export default function HomePage() {
     date: today,
   });
 
-  // 브랜드 목록 조회
-  const { data: brandsData, isLoading: brandsLoading } = useBrandList();
-
   // 좋아요 정보
   const { data: likesData } = useMyLikes();
   const likedIds = new Set(
@@ -46,9 +40,6 @@ export default function HomePage() {
   );
   const addLike = useAddLike();
   const removeLike = useRemoveLike();
-
-  // 브랜드 목록 (API에서 직접 조회)
-  const brands = brandsData?.brands?.slice(0, BRANDS_COUNT) ?? [];
 
   const newProducts = newProductsData?.items?.slice(0, NEW_PRODUCTS_COUNT) ?? [];
   const popularProductsRaw = rankingData?.items?.slice(0, POPULAR_PRODUCTS_COUNT) ?? [];
@@ -75,59 +66,8 @@ export default function HomePage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6">
-      {/* 히어로 섹션 */}
-      <section className="relative overflow-hidden rounded-2xl bg-brand-black py-20 text-brand-white sm:py-28">
-        <div className="relative z-10 mx-auto max-w-2xl px-4 text-center">
-          <h1 className="text-display-lg font-bold tracking-tight sm:text-4xl">
-            GAMSUNG
-          </h1>
-          <p className="mt-3 text-body text-white/80">
-            무신사 스타일 이커머스. 스트릿부터 포멀까지.
-          </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <Link
-              href="/products"
-              className="btn-primary inline-flex items-center px-8 py-3.5 text-body font-semibold"
-            >
-              스타일 보기
-            </Link>
-            <Link
-              href="/ranking"
-              className="btn-outline inline-flex items-center border-white/40 bg-transparent px-8 py-3.5 text-body font-semibold text-white hover:bg-white/10 hover:border-white"
-            >
-              인기 랭킹
-            </Link>
-          </div>
-        </div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(255,255,255,0.15),transparent)]" />
-      </section>
-
-      {/* 브랜드 섹션 */}
-      <section className="mt-20">
-        <div className="flex items-center justify-between">
-          <h2 className="text-display font-bold text-brand-black">브랜드</h2>
-          <Link
-            href="/products"
-            className="text-body text-brand-gray transition-colors hover:text-brand-black"
-          >
-            전체 보기 →
-          </Link>
-        </div>
-        {brandsLoading || brands.length === 0 ? (
-          <div className="mt-6 flex justify-center py-12">
-            <Spinner size="lg" />
-          </div>
-        ) : (
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {brands.map((brand) => (
-              <BrandCard key={brand.id} brandName={brand.name} brandId={brand.id} />
-            ))}
-          </div>
-        )}
-      </section>
-
       {/* 신상품 섹션 */}
-      <section className="mt-20">
+      <section className="pt-8">
         <div className="flex items-center justify-between">
           <h2 className="text-display font-bold text-brand-black">신상품</h2>
           <Link
