@@ -88,7 +88,15 @@ export default function OrderFormPage() {
         quantity: item.quantity,
       }));
 
-      // 2. payment-session
+      // 2. ready - 주문 전체 정보를 서버에 등록
+      await readyOrder(userId, issueResult.orderNo, {
+        paymentMethod: "CARD",
+        orderKey: issueResult.orderKey,
+        orderItems,
+        couponId: null,
+      });
+
+      // 3. payment-session - PG 결제 URL 확보
       const sessionResult = await createPaymentSession(userId, {
         orderNo: issueResult.orderNo,
         orderKey: issueResult.orderKey,
@@ -100,14 +108,6 @@ export default function OrderFormPage() {
       });
 
       setPaymentUrl(sessionResult.paymentUrl);
-
-      // 3. ready - 최종 결제 준비
-      await readyOrder(userId, issueResult.orderNo, {
-        paymentMethod: "CARD",
-        orderKey: issueResult.orderKey,
-        orderItems,
-        couponId: null,
-      });
 
       // 4. 결제 모달 열기
       setIsPaymentModalOpen(true);
