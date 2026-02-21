@@ -33,7 +33,7 @@ export default function ProductDetailPage() {
   const removeLike = useRemoveLike();
   const addToCartMutation = useAddToCart();
   const addToLocalCart = useCartStore((s) => s.addItem);
-  const setBuyNowCartItemId = useOrderFlowStore((s) => s.setBuyNowCartItemId);
+  const setSelectedCartItemIds = useOrderFlowStore((s) => s.setSelectedCartItemIds);
 
   if (productId == null || isError) {
     return (
@@ -105,7 +105,7 @@ export default function ProductDetailPage() {
           onSuccess: (cart) => {
             const addedItem = cart.items.find((item) => item.productId === productId);
             if (addedItem?.itemId) {
-              setBuyNowCartItemId(addedItem.itemId);
+              setSelectedCartItemIds([addedItem.itemId]);
               router.push("/order/order-form");
             }
           },

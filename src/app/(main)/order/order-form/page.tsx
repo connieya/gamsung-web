@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuthStore } from "@/features/auth/store";
@@ -16,9 +16,6 @@ export default function OrderFormPage() {
   const router = useRouter();
   const userId = useAuthStore((s) => s.userId);
   const isLoggedIn = !!userId;
-  const buyNowCartItemId = useOrderFlowStore((s) => s.buyNowCartItemId);
-  const clearBuyNowCartItemId = useOrderFlowStore((s) => s.clearBuyNowCartItemId);
-
   const [orderFormData, setOrderFormData] = useState<OrderFormResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,6 +31,8 @@ export default function OrderFormPage() {
   const [orderKey, setOrderKey] = useState<string | null>(null);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
 
+  const fetchedRef = useRef(false);
+
   useEffect(() => {
     if (!isLoggedIn) {
       alert("로그인이 필요합니다.");
@@ -41,12 +40,17 @@ export default function OrderFormPage() {
       return;
     }
 
-    if (!userId) {
+    if (!userId || fetchedRef.current) {
       return;
     }
+    fetchedRef.current = true;
+
+    // 원샷 소비: 스토어에서 직접 읽고 즉시 클리어
+    const { selectedCartItemIds } = useOrderFlowStore.getState();
+    useOrderFlowStore.getState().clearSelectedCartItemIds();
 
     const timestamp = Date.now();
-    getOrderForm(userId, buyNowCartItemId, timestamp)
+    getOrderForm(userId, selectedCartItemIds, timestamp)
       .then((data) => {
         setOrderFormData(data);
         if (data.member.name) {
@@ -58,10 +62,9 @@ export default function OrderFormPage() {
         alert("주문서를 불러오는데 실패했습니다.");
       })
       .finally(() => {
-        clearBuyNowCartItemId();
         setIsLoading(false);
       });
-  }, [isLoggedIn, userId, buyNowCartItemId, clearBuyNowCartItemId, router]);
+  }, [isLoggedIn, userId, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

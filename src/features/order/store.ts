@@ -1,19 +1,13 @@
 import { create } from "zustand";
 
 interface OrderFlowState {
-  buyNowCartItemId: number | null;
-  setBuyNowCartItemId: (cartItemId: number) => void;
-  consumeBuyNowCartItemId: () => number | null;
-  clearBuyNowCartItemId: () => void;
+  selectedCartItemIds: number[];
+  setSelectedCartItemIds: (ids: number[]) => void;
+  clearSelectedCartItemIds: () => void;
 }
 
-export const useOrderFlowStore = create<OrderFlowState>((set, get) => ({
-  buyNowCartItemId: null,
-  setBuyNowCartItemId: (cartItemId) => set({ buyNowCartItemId: cartItemId }),
-  consumeBuyNowCartItemId: () => {
-    const cartItemId = get().buyNowCartItemId;
-    set({ buyNowCartItemId: null });
-    return cartItemId;
-  },
-  clearBuyNowCartItemId: () => set({ buyNowCartItemId: null }),
+export const useOrderFlowStore = create<OrderFlowState>((set) => ({
+  selectedCartItemIds: [],
+  setSelectedCartItemIds: (ids) => set({ selectedCartItemIds: ids }),
+  clearSelectedCartItemIds: () => set({ selectedCartItemIds: [] }),
 }));
