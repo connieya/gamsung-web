@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useAuthStore } from "@/features/auth/store";
 import { useMe } from "@/features/auth/hooks";
-import { useCart } from "@/features/cart/hooks";
+import { useCartCount } from "@/features/cart/hooks";
 import { useCartStore } from "@/features/cart/store";
 
 function displayName(email: string | undefined): string {
@@ -19,10 +19,10 @@ export function Header() {
   const userName = displayName(me?.email);
   
   // 장바구니 총 수량(같은 상품 수량 증가도 배지에 반영)
-  const { data: serverCart } = useCart();
+  const { data: serverCartCount } = useCartCount();
   const localCart = useCartStore((s) => s.items);
   const cartItemCount = userId 
-    ? (serverCart?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0)
+    ? (serverCartCount?.count ?? 0)
     : localCart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (

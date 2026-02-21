@@ -5,6 +5,7 @@ import {
   updateCartItemQuantity,
   removeCartItem,
   clearCart,
+  getCartCount,
 } from "./api";
 import type { AddToCartRequest, UpdateQuantityRequest } from "./types";
 import { useAuthStore } from "@/features/auth/store";
@@ -12,6 +13,7 @@ import { useAuthStore } from "@/features/auth/store";
 const cartKeys = {
   all: ["cart"] as const,
   detail: (userId: string | null) => [...cartKeys.all, "detail", userId] as const,
+  count: (userId: string | null) => [...cartKeys.all, "count", userId] as const,
 };
 
 export function useCart() {
@@ -34,6 +36,8 @@ export function useAddToCart() {
     onSuccess: (cart) => {
       // Reflect the latest cart immediately so header badge updates without delay.
       queryClient.setQueryData(cartKeys.detail(userId), cart);
+      // Update cart count for header badge
+      queryClient.setQueryData(cartKeys.count(userId), { count: cart.items.reduce((sum, item) => sum + item.quantity, 0) });
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
     },
   });
@@ -73,5 +77,15 @@ export function useClearCart() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
     },
+  });
+}
+
+export function useCartCount() {
+  const userId = useAuthStore((s) => s.userId);
+
+  return useQuery({
+    queryKey: cartKeys.count(userId),
+    queryFn: () => getCartCount(userId!),
+    enabled: !!userId,
   });
 }

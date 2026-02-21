@@ -37,3 +37,7 @@ export async function removeCartItem(
 export async function clearCart(userId: string): Promise<void> {
   await client.delete("/cart", { headers: headers(userId) });
 }
+
+export async function getCartCount(userId: string): Promise<{ count: number }> {
+  return client.get<{ count: number }>("/cart/count", { headers: headers(userId) });
+}
