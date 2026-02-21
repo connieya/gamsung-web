@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useAuthStore } from "@/features/auth/store";
 import { useMe } from "@/features/auth/hooks";
 import { useCartCount } from "@/features/cart/hooks";
 import { useCartStore } from "@/features/cart/store";
+import { GlobalMenuModal } from "@/components/layout/GlobalMenuModal";
 
 function displayName(email: string | undefined): string {
   if (!email) return "";
@@ -13,6 +15,7 @@ function displayName(email: string | undefined): string {
 }
 
 export function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const userId = useAuthStore((s) => s.userId);
   const logout = useAuthStore((s) => s.logout);
   const { data: me } = useMe();
@@ -26,69 +29,96 @@ export function Header() {
     : localCart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-brand-border bg-brand-white">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-8 px-4 sm:px-6">
-        <Link
-          href="/"
-          className="shrink-0 text-xl font-bold tracking-tight text-brand-black hover:opacity-80"
-        >
-          GAMSUNG
-        </Link>
-
-        <div className="hidden flex-1 max-w-md sm:block">
-          <div className="rounded-full border border-brand-border bg-brand-bg px-4 py-2.5 text-caption text-brand-gray">
-            상품 검색
+    <>
+      <header className="sticky top-0 z-50 border-b border-brand-border bg-brand-white">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-8 px-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsMenuOpen(true)}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-border text-brand-black transition-colors hover:bg-brand-bg"
+              aria-label="전체 메뉴 열기"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+              >
+                <path
+                  d="M4 7H20M4 12H20M4 17H20"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+            <Link
+              href="/"
+              className="shrink-0 text-xl font-bold tracking-tight text-brand-black hover:opacity-80"
+            >
+              GAMSUNG
+            </Link>
           </div>
-        </div>
 
-        <nav className="flex shrink-0 items-center gap-6">
-          <Link href="/products" className="link-nav font-medium">
-            스타일
-          </Link>
-          <Link href="/ranking" className="link-nav font-medium">
-            랭킹
-          </Link>
-          <Link href="/orders/cart" className="relative link-nav font-medium">
-            <span>장바구니</span>
-            {cartItemCount > 0 && (
-              <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-brand-black text-caption font-bold text-white">
-                {cartItemCount > 99 ? "99+" : cartItemCount}
-              </span>
-            )}
-          </Link>
-          {userId ? (
-            <>
-              {userName && (
-                <span className="text-caption font-medium text-brand-gray">
-                  {userName}님
+          <div className="hidden max-w-md flex-1 sm:block">
+            <div className="rounded-full border border-brand-border bg-brand-bg px-4 py-2.5 text-caption text-brand-gray">
+              상품 검색
+            </div>
+          </div>
+
+          <nav className="flex shrink-0 items-center gap-6">
+            <Link href="/products" className="link-nav font-medium">
+              스타일
+            </Link>
+            <Link href="/ranking" className="link-nav font-medium">
+              랭킹
+            </Link>
+            <Link href="/orders/cart" className="relative link-nav font-medium">
+              <span>장바구니</span>
+              {cartItemCount > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-brand-black text-caption font-bold text-white">
+                  {cartItemCount > 99 ? "99+" : cartItemCount}
                 </span>
               )}
-              <Link href="/my-page" className="link-nav font-medium">
-                마이
-              </Link>
-              <button
-                type="button"
-                onClick={logout}
-                className="link-nav text-caption"
-              >
-                로그아웃
-              </button>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="link-nav font-medium">
-                로그인
-              </Link>
-              <Link
-                href="/join"
-                className="rounded-full bg-brand-black px-4 py-2 text-caption font-medium text-white hover:bg-black"
-              >
-                회원가입
-              </Link>
-            </>
-          )}
-        </nav>
-      </div>
-    </header>
+            </Link>
+            {userId ? (
+              <>
+                {userName && (
+                  <span className="text-caption font-medium text-brand-gray">
+                    {userName}님
+                  </span>
+                )}
+                <Link href="/my-page" className="link-nav font-medium">
+                  마이
+                </Link>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="link-nav text-caption"
+                >
+                  로그아웃
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="link-nav font-medium">
+                  로그인
+                </Link>
+                <Link
+                  href="/join"
+                  className="rounded-full bg-brand-black px-4 py-2 text-caption font-medium text-white hover:bg-black"
+                >
+                  회원가입
+                </Link>
+              </>
+            )}
+          </nav>
+        </div>
+      </header>
+      <GlobalMenuModal isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+    </>
   );
 }
