@@ -30,15 +30,17 @@ src/
 │   ├── layout.tsx
 │   └── providers.tsx
 ├── components/
-│   ├── ui/                   # Button, Input, Spinner
-│   ├── domain/               # ProductCard
-│   └── layout/               # Header, Footer
-├── features/                 # 도메인별 API·훅·타입
+│   ├── ui/                   # Button, Input, Spinner, Modal
+│   ├── domain/               # ProductCard, BrandCard, PaymentModal, PaymentMethodSelector
+│   └── layout/               # Header, Footer, GlobalMenuModal
+├── features/                 # 도메인별 API·훅·타입·상수
 │   ├── auth/                 # 회원가입·로그인·useAuthStore
 │   ├── product/
 │   ├── brand/
+│   ├── cart/
 │   ├── likes/
-│   ├── order/
+│   ├── order/                # 주문 (useOrderCheckout 등)
+│   ├── payment/              # 결제 (constants.ts: 결제 수단 상수·resolvePayment)
 │   ├── point/
 │   └── ranking/
 ├── lib/
@@ -47,9 +49,9 @@ src/
     └── api.ts                # ApiResponse 등 공통 타입
 ```
 
-- **app**: 페이지·레이아웃만. 비즈니스 로직·상태는 `features`/`hooks`로 위임.
+- **app**: 페이지·레이아웃만. 비즈니스 로직·상태는 `features`의 커스텀 훅으로 위임.
 - **components**: props 기반 presentational. API·전역 상태 직접 사용 지양.
-- **features**: `api.ts`, `hooks.ts`, `types.ts` 단위. 페이지/컴포넌트는 여기만 참조.
+- **features**: `api.ts`, `hooks.ts`, `types.ts`, `constants.ts`(필요 시) 단위. 페이지/컴포넌트는 여기만 참조.
 - **lib**: fetch 래퍼·인증 헤더 등 도메인 무관 코드.
 
 ## 실행 방법
@@ -80,11 +82,13 @@ npm start
 
 | 경로              | 설명                                 |
 | ----------------- | ------------------------------------ |
-| `/`               | 홈 (히어로·카테고리)                 |
+| `/`               | 홈 (신상품·인기상품)                 |
 | `/products`       | 상품 목록 (정렬·페이지네이션·좋아요) |
 | `/products/[id]`  | 상품 상세                            |
 | `/brands/[id]`    | 브랜드 소개·상품 목록                |
 | `/ranking`        | 인기 랭킹                            |
+| `/orders/cart`    | 장바구니 (선택 주문)                 |
+| `/order/order-form` | 주문서 (배송지·결제 수단 선택·결제) |
 | `/login`, `/join` | 로그인(데모: X-USER-ID), 회원가입    |
 | `/my-page`        | 마이 (주문·좋아요·포인트)            |
 
