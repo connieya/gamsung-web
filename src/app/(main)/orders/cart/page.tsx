@@ -34,16 +34,25 @@ export default function CartPage() {
   const items = cart?.items ?? [];
 
   // 선택 상태 관리 (로그인 사용자만)
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<number> | null>(null);
 
-  // 아이템 목록이 변경되면 전체 선택으로 초기화
+  // 최초 진입 시 전체 선택, 이후 아이템 삭제 시 존재하지 않는 ID만 제거
   useEffect(() => {
-    if (isLoggedIn && items.length > 0) {
-      setSelectedIds(new Set(items.map((item) => item.itemId!).filter(Boolean)));
-    }
-  }, [isLoggedIn, items.length]);
+    if (!isLoggedIn || items.length === 0) return;
 
-  const isAllSelected = isLoggedIn && items.length > 0 && selectedIds.size === items.filter((i) => i.itemId).length;
+    setSelectedIds((prev) => {
+      if (prev === null) {
+        // 최초 진입: 전체 선택
+        return new Set(items.map((item) => item.itemId!).filter(Boolean));
+      }
+      // 이후: 현재 존재하는 아이템 ID와 교집합 (삭제된 아이템 ID 제거)
+      const currentIds = new Set(items.map((item) => item.itemId!).filter(Boolean));
+      return new Set([...prev].filter((id) => currentIds.has(id)));
+    });
+  }, [isLoggedIn, items]);
+
+  const selected = selectedIds ?? new Set<number>();
+  const isAllSelected = isLoggedIn && items.length > 0 && selected.size === items.filter((i) => i.itemId).length;
 
   const handleToggleAll = () => {
     if (isAllSelected) {
@@ -67,7 +76,7 @@ export default function CartPage() {
 
   const selectedTotal = isLoggedIn
     ? items
-        .filter((item) => item.itemId && selectedIds.has(item.itemId))
+        .filter((item) => item.itemId && selected.has(item.itemId))
         .reduce((sum, item) => sum + item.price * item.quantity, 0)
     : cart?.totalAmount ?? 0;
 
@@ -99,7 +108,7 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (isLoggedIn) {
-      const ids = Array.from(selectedIds);
+      const ids = Array.from(selected);
       if (ids.length === 0) {
         alert("주문할 상품을 선택해주세요.");
         return;
@@ -155,7 +164,7 @@ export default function CartPage() {
                 className="w-5 h-5 accent-brand-black rounded"
               />
               <span className="text-body font-medium text-brand-black">
-                전체 선택 ({selectedIds.size}/{items.length})
+                전체 선택 ({selected.size}/{items.length})
               </span>
             </label>
           )}
@@ -170,7 +179,7 @@ export default function CartPage() {
                 {isLoggedIn && item.itemId && (
                   <input
                     type="checkbox"
-                    checked={selectedIds.has(item.itemId)}
+                    checked={selected.has(item.itemId)}
                     onChange={() => handleToggleItem(item.itemId!)}
                     className="w-5 h-5 accent-brand-black rounded flex-shrink-0"
                   />
@@ -226,7 +235,7 @@ export default function CartPage() {
           <div className="rounded-xl border border-brand-border bg-brand-bg p-6">
             <div className="flex justify-between items-center mb-6">
               <span className="text-title font-semibold text-brand-black">
-                {isLoggedIn ? `선택 상품 금액 (${selectedIds.size}건)` : "총 금액"}
+                {isLoggedIn ? `선택 상품 금액 (${selected.size}건)` : "총 금액"}
               </span>
               <span className="text-display font-bold text-brand-black">
                 {selectedTotal.toLocaleString()}원
@@ -236,7 +245,7 @@ export default function CartPage() {
               onClick={handleCheckout}
               className="w-full"
               size="lg"
-              disabled={isLoggedIn && selectedIds.size === 0}
+              disabled={isLoggedIn && selected.size === 0}
             >
               주문하기
             </Button>
