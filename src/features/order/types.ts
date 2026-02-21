@@ -1,3 +1,5 @@
+import type { PaymentMethod, PayKind } from "@/features/payment/types";
+
 export type OrderStatus = "INIT" | "PAID" | "SHIPPED" | "DELIVERED" | "CANCELLED";
 
 export interface OrderSummary {
@@ -61,7 +63,7 @@ export interface OrderItemDto {
 
 export interface OrderFormResponse {
   member: {
-    name: string;
+    userId: string;
     email: string;
   };
   cartItems: Array<{
@@ -76,8 +78,8 @@ export interface OrderFormResponse {
 }
 
 export interface OrderReadyRequest {
-  paymentMethod: "CARD" | "POINT";
-  payKind?: "CARD" | "POINT" | "KAKAOPAY" | "TOSSPAY" | "NAVERPAY" | "PAYCO";
+  paymentMethod: PaymentMethod;
+  payKind?: PayKind;
   orderKey: string;
   orderItems: Array<{
     productId: number;
@@ -94,8 +96,8 @@ export interface OrderReadyResponse {
 export interface OrderPaymentSessionRequest {
   orderNo: string;
   orderKey: string;
-  paymentMethod: "CARD" | "POINT";
-  payKind?: "CARD" | "POINT" | "KAKAOPAY" | "TOSSPAY" | "NAVERPAY" | "PAYCO";
+  paymentMethod: PaymentMethod;
+  payKind?: PayKind;
   orderItems: Array<{
     productId: number;
     quantity: number;

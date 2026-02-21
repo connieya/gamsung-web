@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
+import type { PayKind } from "@/features/payment/types";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface PaymentModalProps {
   phone: string;
   totalAmount: number;
   paymentUrl: string | null;
+  payKind: PayKind;
   onPaymentSuccess: () => void;
 }
 
@@ -26,6 +28,7 @@ export function PaymentModal({
   phone,
   totalAmount,
   paymentUrl,
+  payKind,
   onPaymentSuccess,
 }: PaymentModalProps) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -73,18 +76,50 @@ export function PaymentModal({
           </div>
         </section>
 
-        {/* 결제 안내 */}
-        <section className="rounded-xl border border-brand-border bg-brand-white p-4">
-          <h3 className="text-body font-semibold text-brand-black mb-2">결제 진행</h3>
-          <p className="text-caption text-brand-gray">
-            "결제하기" 버튼을 클릭하면 결제가 자동으로 완료됩니다.
-          </p>
-          {paymentUrl && (
-            <p className="text-caption text-brand-gray mt-2">
-              결제 URL: {paymentUrl}
+        {/* 결제 진행 - 결제사별 분기 */}
+        {payKind === "KAKAOPAY" ? (
+          <section className="rounded-xl overflow-hidden">
+            <div className="flex flex-col items-center gap-4 p-8" style={{ backgroundColor: "#FEE500" }}>
+              <span className="text-xl font-bold text-black">카카오페이</span>
+              <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-white">
+                <span className="text-caption text-brand-gray">QR Code</span>
+              </div>
+              <p className="text-body font-medium text-black/80">
+                카카오톡에서 결제를 완료해주세요
+              </p>
+              <p className="text-title font-semibold text-black">
+                결제 금액: {totalAmount.toLocaleString()}원
+              </p>
+            </div>
+          </section>
+        ) : payKind === "TOSSPAY" ? (
+          <section className="rounded-xl overflow-hidden">
+            <div className="flex flex-col items-center gap-4 p-8" style={{ backgroundColor: "#0064FF" }}>
+              <span className="text-xl font-bold text-white">토스페이</span>
+              <div className="flex h-40 w-40 items-center justify-center rounded-lg bg-white">
+                <span className="text-caption text-brand-gray">QR Code</span>
+              </div>
+              <p className="text-body font-medium text-white/80">
+                토스 앱에서 결제를 완료해주세요
+              </p>
+              <p className="text-title font-semibold text-white">
+                결제 금액: {totalAmount.toLocaleString()}원
+              </p>
+            </div>
+          </section>
+        ) : (
+          <section className="rounded-xl border border-brand-border bg-brand-white p-4">
+            <h3 className="text-body font-semibold text-brand-black mb-2">결제 진행</h3>
+            <p className="text-caption text-brand-gray">
+              &quot;결제하기&quot; 버튼을 클릭하면 결제가 자동으로 완료됩니다.
             </p>
-          )}
-        </section>
+            {paymentUrl && (
+              <p className="text-caption text-brand-gray mt-2">
+                결제 URL: {paymentUrl}
+              </p>
+            )}
+          </section>
+        )}
 
         <div className="flex gap-3 pt-4">
           <Button
@@ -108,6 +143,8 @@ export function PaymentModal({
                 <Spinner size="sm" className="mr-2" />
                 결제 처리 중...
               </>
+            ) : payKind === "KAKAOPAY" || payKind === "TOSSPAY" ? (
+              "결제완료 확인"
             ) : (
               "결제하기"
             )}
