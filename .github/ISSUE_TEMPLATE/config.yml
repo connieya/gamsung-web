@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "프로젝트 README"
+    url: "https://github.com/connieya/gamsung-web/blob/main/README.md"
+    about: "프로젝트 구조와 개발 가이드를 확인하세요."

@@ -1,0 +1,88 @@
+name: "Feature Request"
+description: "새로운 기능 요청"
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 기능 요청
+        PM 또는 개발자가 새로운 화면/기능을 정의할 때 사용합니다.
+
+  - type: textarea
+    id: background
+    attributes:
+      label: "배경 및 목적"
+      description: "이 기능이 필요한 이유와 비즈니스 맥락을 설명해주세요."
+      placeholder: "예: 사용자가 상품을 빠르게 비교하고 장바구니에 담을 수 있도록 상품 목록 화면이 필요합니다."
+    validations:
+      required: true
+
+  - type: textarea
+    id: happy-path
+    attributes:
+      label: "Happy Path (정상 시나리오)"
+      description: "사용자 관점에서 정상적인 UI 흐름을 단계별로 작성해주세요."
+      placeholder: |
+        1. 사용자가 카테고리 탭을 선택한다
+        2. 상품 목록이 무한 스크롤로 로드된다
+        3. 상품 카드의 '좋아요' 버튼을 누르면 즉시 UI에 반영된다
+        4. 상품 카드를 탭하면 상품 상세 페이지로 이동한다
+    validations:
+      required: true
+
+  - type: textarea
+    id: fail-path
+    attributes:
+      label: "Fail Path (예외 시나리오)"
+      description: "실패하거나 예외적인 상황에서의 UI 처리를 나열해주세요."
+      placeholder: |
+        - 네트워크 오류 시 에러 메시지와 재시도 버튼 표시
+        - 빈 결과일 때 '검색 결과가 없습니다' 안내
+        - 비로그인 상태에서 좋아요 클릭 시 로그인 모달 표시
+    validations:
+      required: true
+
+  - type: textarea
+    id: ui-spec
+    attributes:
+      label: "화면/컴포넌트 구성"
+      description: "필요한 화면, 컴포넌트, 레이아웃 구조를 설명해주세요."
+      placeholder: |
+        - 페이지: `/products` (상품 목록)
+        - 컴포넌트: ProductCard, CategoryTab, SortDropdown
+        - 레이아웃: 2열 그리드, 모바일 대응
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: "인수 조건 (Acceptance Criteria)"
+      description: "이 기능이 '완료'되었다고 판단할 수 있는 조건을 체크리스트로 작성해주세요."
+      placeholder: |
+        - [ ] 상품 목록이 정상 렌더링된다
+        - [ ] 무한 스크롤이 동작한다
+        - [ ] 로딩/에러/빈 상태가 적절히 표시된다
+        - [ ] 모바일 반응형이 적용되었다
+    validations:
+      required: true
+
+  - type: textarea
+    id: api-dependency
+    attributes:
+      label: "백엔드 API 의존성 (해당 시)"
+      description: "사용할 백엔드 API 엔드포인트와 연동 상태를 작성해주세요."
+      placeholder: |
+        - `GET /api/v1/products` — 구현 완료
+        - `POST /api/v1/likes` — 구현 예정 (GS-XX)
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: "참고 자료"
+      description: "디자인 시안, 와이어프레임, 관련 이슈 링크 등"
+      placeholder: "Figma 링크, 관련 백엔드 이슈 #XX"
+    validations:
+      required: false
