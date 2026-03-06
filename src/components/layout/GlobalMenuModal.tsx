@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   brandGroups,
-  menuCategories,
   popularBrands,
   type BrandGroup,
   type MenuTab,
 } from "@/features/brand/mockMenuData";
+import { useCategoryTree } from "@/features/category/hooks";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface GlobalMenuModalProps {
   isOpen: boolean;
@@ -15,12 +17,21 @@ interface GlobalMenuModalProps {
 }
 
 export function GlobalMenuModal({ isOpen, onClose }: GlobalMenuModalProps) {
+  const router = useRouter();
   const [selectedTab, setSelectedTab] = useState<MenuTab>("category");
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
-    menuCategories[0]?.id ?? ""
-  );
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [selectedBrandGroup, setSelectedBrandGroup] = useState<BrandGroup>("의류");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const { data: categoryData, isLoading: categoryLoading } = useCategoryTree();
+  const categories = categoryData?.categories ?? [];
+
+  // 카테고리 로드 후 첫 번째 항목 자동 선택
+  useEffect(() => {
+    if (selectedCategoryId === null && categories.length > 0) {
+      setSelectedCategoryId(categories[0].id);
+    }
+  }, [categories, selectedCategoryId]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -48,8 +59,8 @@ export function GlobalMenuModal({ isOpen, onClose }: GlobalMenuModalProps) {
   }, [searchTerm, selectedBrandGroup]);
 
   const selectedCategory = useMemo(
-    () => menuCategories.find((category) => category.id === selectedCategoryId),
-    [selectedCategoryId]
+    () => categories.find((category) => category.id === selectedCategoryId),
+    [categories, selectedCategoryId]
   );
 
   if (!isOpen) return null;
@@ -97,43 +108,76 @@ export function GlobalMenuModal({ isOpen, onClose }: GlobalMenuModalProps) {
 
         <div className="flex min-h-0 flex-1">
           {selectedTab === "category" ? (
-            <>
-              <aside className="w-52 shrink-0 border-r border-brand-border bg-[#fafafa] px-2 py-3">
-                {menuCategories.map((category) => (
-                  <button
-                    key={category.id}
-                    type="button"
-                    onClick={() => setSelectedCategoryId(category.id)}
-                    className={`flex w-full items-center rounded-lg px-4 py-3 text-left text-body transition-colors ${
-                      selectedCategoryId === category.id
-                        ? "bg-brand-black text-brand-white"
-                        : "text-brand-black hover:bg-brand-bg"
-                    }`}
-                  >
-                    {category.name}
-                  </button>
-                ))}
-              </aside>
-              <section className="flex-1 overflow-y-auto px-6 py-6 sm:px-8">
-                <h3 className="text-display font-bold text-brand-black">
-                  {selectedCategory?.name ?? "카테고리"}
-                </h3>
-                <p className="mt-2 text-body text-brand-gray">
-                  무신사 스타일로 자주 찾는 카테고리를 빠르게 탐색할 수 있어요.
-                </p>
-                <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                  {menuCategories.map((category) => (
+            categoryLoading ? (
+              <div className="flex flex-1 items-center justify-center">
+                <Spinner size="lg" />
+              </div>
+            ) : categories.length === 0 ? (
+              <div className="flex flex-1 items-center justify-center">
+                <p className="text-body text-brand-gray">카테고리가 없습니다.</p>
+              </div>
+            ) : (
+              <>
+                <aside className="w-52 shrink-0 overflow-y-auto border-r border-brand-border bg-[#fafafa] px-2 py-3">
+                  {categories.map((category) => (
                     <button
-                      key={`tile-${category.id}`}
+                      key={category.id}
                       type="button"
-                      className="rounded-lg border border-brand-border bg-brand-white px-4 py-4 text-left text-body font-medium text-brand-black transition-colors hover:bg-brand-bg"
+                      onClick={() => setSelectedCategoryId(category.id)}
+                      className={`flex w-full items-center rounded-lg px-4 py-3 text-left text-body transition-colors ${
+                        selectedCategoryId === category.id
+                          ? "bg-brand-black text-brand-white"
+                          : "text-brand-black hover:bg-brand-bg"
+                      }`}
                     >
                       {category.name}
                     </button>
                   ))}
-                </div>
-              </section>
-            </>
+                </aside>
+                <section className="flex-1 overflow-y-auto px-6 py-6 sm:px-8">
+                  <h3 className="text-display font-bold text-brand-black">
+                    {selectedCategory?.name ?? "카테고리"}
+                  </h3>
+                  <p className="mt-2 text-body text-brand-gray">
+                    카테고리를 선택하여 상품을 탐색할 수 있어요.
+                  </p>
+                  <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                    {/* 전체 보기 */}
+                    {selectedCategory && (
+                      <button
+                        key={`all-${selectedCategory.id}`}
+                        type="button"
+                        onClick={() => {
+                          router.push(`/category/${selectedCategory.id}/goods`);
+                          onClose();
+                        }}
+                        className="rounded-lg border border-brand-black bg-brand-black px-4 py-4 text-left text-body font-medium text-brand-white transition-colors hover:opacity-90"
+                      >
+                        전체 보기
+                      </button>
+                    )}
+                    {(selectedCategory?.children ?? []).map((child) => (
+                      <button
+                        key={child.id}
+                        type="button"
+                        onClick={() => {
+                          router.push(`/category/${child.id}/goods`);
+                          onClose();
+                        }}
+                        className="rounded-lg border border-brand-border bg-brand-white px-4 py-4 text-left text-body font-medium text-brand-black transition-colors hover:bg-brand-bg"
+                      >
+                        {child.name}
+                      </button>
+                    ))}
+                    {(selectedCategory?.children ?? []).length === 0 && !selectedCategory && (
+                      <p className="col-span-full text-body text-brand-gray">
+                        하위 카테고리가 없습니다.
+                      </p>
+                    )}
+                  </div>
+                </section>
+              </>
+            )
           ) : (
             <>
               <aside className="w-52 shrink-0 border-r border-brand-border bg-[#fafafa] px-2 py-3">

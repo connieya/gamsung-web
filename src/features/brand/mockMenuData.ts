@@ -2,31 +2,11 @@ export type MenuTab = "category" | "brand";
 
 export type BrandGroup = "의류" | "뷰티" | "신발" | "스니커즈";
 
-export interface CategoryItem {
-  id: string;
-  name: string;
-}
-
 export interface BrandItem {
   id: number;
   name: string;
   group: BrandGroup;
 }
-
-export const menuCategories: CategoryItem[] = [
-  { id: "beauty", name: "뷰티" },
-  { id: "shoes", name: "신발" },
-  { id: "tops", name: "상의" },
-  { id: "outer", name: "아우터" },
-  { id: "pants", name: "바지" },
-  { id: "dress", name: "원피스" },
-  { id: "skirt", name: "스커트" },
-  { id: "bag", name: "가방" },
-  { id: "accessory", name: "소품" },
-  { id: "sports", name: "스포츠" },
-  { id: "underwear", name: "언더웨어" },
-  { id: "kids", name: "키즈" },
-];
 
 export const brandGroups: BrandGroup[] = ["의류", "뷰티", "신발", "스니커즈"];
 
