@@ -7,6 +7,7 @@ const MENU_ITEMS = [
   { href: "/my-page/orders", label: "주문 내역", desc: "주문·배송 조회" },
   { href: "/my-page/likes", label: "좋아요 목록", desc: "저장한 상품" },
   { href: "/my-page/points", label: "포인트", desc: "잔액·충전" },
+  { href: "/my-page/coupons", label: "쿠폰", desc: "보유·발급" },
 ];
 
 export default function MyPage() {

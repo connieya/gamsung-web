@@ -24,14 +24,14 @@ src/
 │   │   ├── products/         # 상품 목록·상세
 │   │   ├── brands/[id]/      # 브랜드 페이지
 │   │   ├── ranking/          # 인기 랭킹
-│   │   ├── my-page/          # 마이·주문·좋아요·포인트
+│   │   ├── my-page/          # 마이·주문·좋아요·포인트·쿠폰
 │   │   └── layout.tsx
 │   ├── globals.css
 │   ├── layout.tsx
 │   └── providers.tsx
 ├── components/
 │   ├── ui/                   # Button, Input, Spinner, Modal
-│   ├── domain/               # ProductCard, BrandCard, PaymentModal, PaymentMethodSelector
+│   ├── domain/               # ProductCard, BrandCard, CouponCard, PaymentModal, PaymentMethodSelector
 │   └── layout/               # Header, Footer, GlobalMenuModal
 ├── features/                 # 도메인별 API·훅·타입·상수
 │   ├── auth/                 # 회원가입·로그인·useAuthStore
@@ -42,6 +42,7 @@ src/
 │   ├── order/                # 주문 (useOrderCheckout 등)
 │   ├── payment/              # 결제 (constants.ts: 결제 수단 상수·resolvePayment)
 │   ├── point/
+│   ├── coupon/
 │   └── ranking/
 ├── lib/
 │   └── api/                  # client, headers (X-USER-ID)
@@ -90,7 +91,8 @@ npm start
 | `/orders/cart`    | 장바구니 (선택 주문)                 |
 | `/order/order-form` | 주문서 (배송지·결제 수단 선택·결제) |
 | `/login`, `/join` | 로그인(데모: X-USER-ID), 회원가입    |
-| `/my-page`        | 마이 (주문·좋아요·포인트)            |
+| `/my-page`        | 마이 (주문·좋아요·포인트·쿠폰)      |
+| `/my-page/coupons`| 쿠폰 (보유·발급)                     |
 
 ## 규칙·컨벤션
 
