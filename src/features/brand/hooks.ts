@@ -5,10 +5,11 @@ import { getBrands, getBrand } from "./api";
 
 const brandKey = ["brand"] as const;
 
-export function useBrandList() {
+export function useBrandList(enabled = true) {
   return useQuery({
     queryKey: [...brandKey, "list"],
     queryFn: getBrands,
+    enabled,
   });
 }
 

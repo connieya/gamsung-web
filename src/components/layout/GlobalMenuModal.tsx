@@ -2,14 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  brandGroups,
-  popularBrands,
-  type BrandGroup,
-  type MenuTab,
-} from "@/features/brand/mockMenuData";
+import { useBrandList } from "@/features/brand/hooks";
 import { useCategoryTree } from "@/features/category/hooks";
 import { Spinner } from "@/components/ui/Spinner";
+
+type MenuTab = "category" | "brand";
 
 interface GlobalMenuModalProps {
   isOpen: boolean;
@@ -20,11 +17,21 @@ export function GlobalMenuModal({ isOpen, onClose }: GlobalMenuModalProps) {
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState<MenuTab>("category");
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
-  const [selectedBrandGroup, setSelectedBrandGroup] = useState<BrandGroup>("의류");
   const [searchTerm, setSearchTerm] = useState("");
+  const shouldLoadBrands = isOpen && selectedTab === "brand";
 
   const { data: categoryData, isLoading: categoryLoading } = useCategoryTree();
-  const categories = categoryData?.categories ?? [];
+  const {
+    data: brandData,
+    isLoading: brandLoading,
+    isError: brandError,
+    error: brandErrorDetail,
+  } = useBrandList(shouldLoadBrands);
+  const categories = useMemo(
+    () => categoryData?.categories ?? [],
+    [categoryData?.categories]
+  );
+  const brands = useMemo(() => brandData?.brands ?? [], [brandData?.brands]);
 
   // 카테고리 로드 후 첫 번째 항목 자동 선택
   useEffect(() => {
@@ -51,12 +58,11 @@ export function GlobalMenuModal({ isOpen, onClose }: GlobalMenuModalProps) {
 
   const filteredBrands = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
-    return popularBrands.filter((brand) => {
-      if (brand.group !== selectedBrandGroup) return false;
-      if (!normalizedSearch) return true;
-      return brand.name.toLowerCase().includes(normalizedSearch);
-    });
-  }, [searchTerm, selectedBrandGroup]);
+    if (!normalizedSearch) return brands;
+    return brands.filter((brand) =>
+      brand.name.toLowerCase().includes(normalizedSearch)
+    );
+  }, [brands, searchTerm]);
 
   const selectedCategory = useMemo(
     () => categories.find((category) => category.id === selectedCategoryId),
@@ -180,35 +186,31 @@ export function GlobalMenuModal({ isOpen, onClose }: GlobalMenuModalProps) {
             )
           ) : (
             <>
-              <aside className="w-52 shrink-0 border-r border-brand-border bg-[#fafafa] px-2 py-3">
-                {brandGroups.map((group) => (
-                  <button
-                    key={group}
-                    type="button"
-                    onClick={() => setSelectedBrandGroup(group)}
-                    className={`flex w-full items-center rounded-lg px-4 py-3 text-left text-body transition-colors ${
-                      selectedBrandGroup === group
-                        ? "bg-brand-black text-brand-white"
-                        : "text-brand-black hover:bg-brand-bg"
-                    }`}
-                  >
-                    {group}
-                  </button>
-                ))}
-              </aside>
               <section className="flex-1 overflow-y-auto px-6 py-6 sm:px-8">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
                     <h3 className="text-display font-bold text-brand-black">
-                      인기 브랜드 200
+                      브랜드 탐색
                     </h3>
                     <p className="mt-1 text-body text-brand-gray">
-                      {selectedBrandGroup} 카테고리에서 브랜드를 골라보세요.
+                      등록된 브랜드를 검색하고 바로 상세 페이지로 이동할 수 있어요.
                     </p>
                   </div>
-                  <p className="text-caption text-brand-gray">
-                    결과 {filteredBrands.length}개
-                  </p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-caption text-brand-gray">
+                      결과 {filteredBrands.length}개
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        router.push("/brands");
+                        onClose();
+                      }}
+                      className="rounded-full border border-brand-border px-4 py-2 text-caption font-medium text-brand-black transition-colors hover:bg-brand-bg"
+                    >
+                      전체 브랜드 보기
+                    </button>
+                  </div>
                 </div>
                 <div className="mt-4">
                   <input
@@ -219,17 +221,49 @@ export function GlobalMenuModal({ isOpen, onClose }: GlobalMenuModalProps) {
                     aria-label="브랜드 검색"
                   />
                 </div>
-                <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                  {filteredBrands.map((brand) => (
+                {brandLoading ? (
+                  <div className="flex min-h-[240px] items-center justify-center">
+                    <Spinner size="lg" />
+                  </div>
+                ) : brandError ? (
+                  <div className="mt-6 rounded-xl border border-dashed border-brand-border px-4 py-16 text-center">
+                    <p className="text-body text-red-600">
+                      {brandErrorDetail?.message ?? "브랜드를 불러올 수 없습니다."}
+                    </p>
                     <button
-                      key={brand.id}
                       type="button"
-                      className="rounded-lg border border-brand-border bg-brand-white px-3 py-3 text-left text-body font-medium text-brand-black transition-colors hover:bg-brand-bg"
+                      onClick={() => {
+                        router.push("/brands");
+                        onClose();
+                      }}
+                      className="mt-4 rounded-full border border-brand-border px-4 py-2 text-caption font-medium text-brand-black transition-colors hover:bg-brand-bg"
                     >
-                      {brand.name}
+                      브랜드 페이지로 이동
                     </button>
-                  ))}
-                </div>
+                  </div>
+                ) : filteredBrands.length === 0 ? (
+                  <div className="mt-6 rounded-xl border border-dashed border-brand-border px-4 py-16 text-center">
+                    <p className="text-body text-brand-gray">
+                      검색 결과에 맞는 브랜드가 없습니다.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                    {filteredBrands.map((brand) => (
+                      <button
+                        key={brand.id}
+                        type="button"
+                        onClick={() => {
+                          router.push(`/brands/${brand.id}`);
+                          onClose();
+                        }}
+                        className="rounded-lg border border-brand-border bg-brand-white px-3 py-3 text-left text-body font-medium text-brand-black transition-colors hover:bg-brand-bg"
+                      >
+                        <span className="line-clamp-2">{brand.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </section>
             </>
           )}
