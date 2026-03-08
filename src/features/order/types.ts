@@ -30,20 +30,6 @@ export interface OrderListResponse {
   orders: OrderSummary[];
 }
 
-// Legacy types (keep for backward compatibility)
-export interface OrderPlaceRequest {
-  orderNo?: string;
-  couponId?: number | null;
-  orderItems: { productId: number; quantity: number }[];
-}
-
-export interface OrderPlaceResponse {
-  orderId: number;
-  totalAmount: number;
-  discountAmount: number;
-  orderNo?: string;
-}
-
 export interface OrderIssueOrderNoRequest {
   isNewOrderForm: boolean;
 }

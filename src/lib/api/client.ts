@@ -1,17 +1,30 @@
 /**
- * API base client. 인증 헤더·base URL은 여기서만 설정.
- * commerce-api 응답 형식(meta/data)을 언래핑하여 data만 반환.
+ * API base client. 인증 헤더·서비스별 base URL은 여기서만 설정한다.
+ * 각 백엔드 응답 형식(meta/data)을 언래핑하여 data만 반환한다.
  */
 
 import type { ApiResponse } from "@/types/api";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+const COMMERCE_API_BASE_URL =
+  process.env.NEXT_PUBLIC_COMMERCE_API_BASE_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "";
+const ORDER_API_BASE_URL =
+  process.env.NEXT_PUBLIC_ORDER_API_BASE_URL ??
+  COMMERCE_API_BASE_URL;
 const API_BASE_PATH = "/api/v1";
+const ORDER_API_PREFIXES = ["/cart", "/orders"] as const;
+
+function resolveBaseUrl(path: string): string {
+  return ORDER_API_PREFIXES.some((prefix) => path.startsWith(prefix))
+    ? ORDER_API_BASE_URL
+    : COMMERCE_API_BASE_URL;
+}
 
 function buildUrl(path: string): string {
   const segment = path.startsWith("/") ? path : `/${path}`;
   const fullPath = segment.startsWith(API_BASE_PATH) ? segment : `${API_BASE_PATH}${segment}`;
-  return `${BASE_URL}${fullPath}`;
+  return `${resolveBaseUrl(segment)}${fullPath}`;
 }
 
 async function handleResponse<T>(res: Response): Promise<T> {

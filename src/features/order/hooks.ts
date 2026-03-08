@@ -2,18 +2,17 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/features/auth/store";
 import {
   getOrderDetail,
   getOrders,
-  placeOrder,
   getOrderForm,
   issueOrderNo,
   readyOrder,
   createPaymentSession,
 } from "./api";
-import type { OrderFormResponse, OrderPlaceRequest } from "./types";
+import type { OrderFormResponse } from "./types";
 import { useOrderFlowStore } from "./store";
 import {
   resolvePayment,
@@ -43,17 +42,6 @@ export function useOrderDetail(orderId: number | null) {
     queryKey: [...orderDetailKey, orderId, userId ?? ""],
     queryFn: () => getOrderDetail(userId!, orderId!),
     enabled: !!userId && orderId != null,
-  });
-}
-
-export function usePlaceOrder() {
-  const queryClient = useQueryClient();
-  const userId = useAuthStore((s) => s.userId);
-  return useMutation({
-    mutationFn: (body: OrderPlaceRequest) => placeOrder(userId!, body),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ordersKey });
-    },
   });
 }
 

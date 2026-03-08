@@ -11,5 +11,5 @@ export async function getRanking(params: {
     size: String(params.size),
     date: params.date,
   });
-  return client.get<RankingSummaryResponse>(`/ranking?${search}`);
+  return client.get<RankingSummaryResponse>(`/ranking/daily?${search}`);
 }

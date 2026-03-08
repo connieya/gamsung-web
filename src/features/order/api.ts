@@ -3,8 +3,6 @@ import { USER_ID_HEADER } from "@/lib/api/headers";
 import type {
   OrderIssueOrderNoRequest,
   OrderIssueOrderNoResponse,
-  OrderPlaceRequest,
-  OrderPlaceResponse,
   OrderFormResponse,
   OrderReadyRequest,
   OrderReadyResponse,
@@ -14,13 +12,6 @@ import type {
 
 function headers(userId: string): HeadersInit {
   return { [USER_ID_HEADER]: userId };
-}
-
-export async function placeOrder(
-  userId: string,
-  body: OrderPlaceRequest
-): Promise<OrderPlaceResponse> {
-  return client.post<OrderPlaceResponse>("/orders", body, { headers: headers(userId) });
 }
 
 export async function issueOrderNo(
@@ -62,7 +53,7 @@ export async function createPaymentSession(
   userId: string,
   body: OrderPaymentSessionRequest
 ): Promise<OrderPaymentSessionResponse> {
-  return client.post<OrderPaymentSessionResponse>("/orders/payment-session", body, {
+  return client.post<OrderPaymentSessionResponse>("/payments/session", body, {
     headers: headers(userId),
   });
 }

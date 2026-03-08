@@ -19,11 +19,14 @@ src/
 │   │   ├── login/
 │   │   ├── join/
 │   │   └── layout.tsx
-│   ├── (main)/               # 메인·상품·마이 (레이아웃: Header + Footer)
+│   ├── (main)/               # 메인·상품·브랜드·주문·마이 (레이아웃: Header + Footer)
 │   │   ├── page.tsx          # 홈
 │   │   ├── products/         # 상품 목록·상세
-│   │   ├── brands/[id]/      # 브랜드 페이지
+│   │   ├── brands/           # 브랜드 목록·상세·레거시 이름 경로
+│   │   ├── category/         # 카테고리 상품 목록
 │   │   ├── ranking/          # 인기 랭킹
+│   │   ├── orders/           # 장바구니
+│   │   ├── order/            # 주문서·결과
 │   │   ├── my-page/          # 마이·주문·좋아요·포인트·쿠폰
 │   │   └── layout.tsx
 │   ├── globals.css
@@ -63,7 +66,8 @@ npm install
 
 # 환경 변수 (선택)
 cp .env.example .env.local
-# NEXT_PUBLIC_API_BASE_URL 에 commerce-api 주소 설정 (예: http://localhost:8080)
+# NEXT_PUBLIC_COMMERCE_API_BASE_URL, NEXT_PUBLIC_ORDER_API_BASE_URL 설정
+# 예: commerce-api=http://localhost:8080, order-api=http://localhost:8081
 
 # 개발 서버
 npm run dev
@@ -75,9 +79,11 @@ npm start
 
 ## 환경 변수
 
-| 변수                       | 설명                                                             |
-| -------------------------- | ---------------------------------------------------------------- |
-| `NEXT_PUBLIC_API_BASE_URL` | gamsung-commerce API 서버 base URL (예: `http://localhost:8080`) |
+| 변수 | 설명 |
+| --- | --- |
+| `NEXT_PUBLIC_COMMERCE_API_BASE_URL` | `commerce-api` base URL (예: `http://localhost:8080`) |
+| `NEXT_PUBLIC_ORDER_API_BASE_URL` | `order-api` base URL (예: `http://localhost:8081`) |
+| `NEXT_PUBLIC_API_BASE_URL` | 하위 호환용 기본 base URL. 미설정 시 `commerce-api` 주소로 사용 |
 
 ## 주요 화면
 
@@ -86,7 +92,9 @@ npm start
 | `/`               | 홈 (신상품·인기상품)                 |
 | `/products`       | 상품 목록 (정렬·페이지네이션·좋아요) |
 | `/products/[id]`  | 상품 상세                            |
+| `/brands`         | 브랜드 목록·검색                     |
 | `/brands/[id]`    | 브랜드 소개·상품 목록                |
+| `/category/[id]/goods` | 카테고리별 상품 목록            |
 | `/ranking`        | 인기 랭킹                            |
 | `/orders/cart`    | 장바구니 (선택 주문)                 |
 | `/order/order-form` | 주문서 (배송지·결제 수단 선택·결제) |
